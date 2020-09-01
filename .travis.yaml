@@ -1,0 +1,13 @@
+language: python
+python:
+  - 3.8
+
+install:
+  - pip install poetry pre-commit
+  - poetry config settings.virtualenvs.in-project true
+  - poetry install
+
+script:
+  - pre-commit run --all
+  - poetry run pytest
+  - poetry run mypy openapi_to_fastapi
