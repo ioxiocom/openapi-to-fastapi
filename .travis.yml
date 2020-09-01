@@ -4,8 +4,8 @@ python:
 cache:
   pip: true
   directories:
-    - "$HOME/.cache/pre-commit"
-    - "$HOME/.cache/pypoetry"
+    - $HOME/.cache/pre-commit
+    - $HOME/.cache/pypoetry
 
 env:
   secure: "DFvt19Pjl7XvfEFX+yXKy7Nkvz7n2qbVn3qVw68neeu/0Yf79IjZ7sORtGRtlUOIvYmlnZRApd61v09E9nEP/xcRa5rpCBKedANwla9zI9DOWxC4l3gJXW1SiZGgxZBgXIK9vvDBfai8N5CArgTMt4r+tK+RGdyqSisZ/TCsF0gud2PEy0ImyPlW6T76pVOmOaL8OHEQj0Bppqsr7J3CTM95h4HEouhIayT7oqygyjToBaQz+ltkJ7Zrn13Voqc2NLoNZ7Ap4EVM1Isc81kmiXTeZFr8kfi+TwJMDG3PwltGba1k+1NOZm4hPCc45R+SKgTEQwTB/HfesDKEiDBGQKDO2gFyIFIRm8Uz130ltABp/w9IFjqNZqRO5ozYgypyThkEVPtzkFBMNdJczgW6qNRMDZIRZTPzWCNx02+eANuoJ9R9P6wb3Dam5qyNE4FEPnM8kYxi4Z57lcfA5KtFuNNG2oTuT0U1ZTs3cETu7g2Bco5bOv21cz2sinimxj4sfrbhGYNWlcUSfGEpJEHfDHJ0ibjAB9mx69/am6dSN38FFEXlGikBDRB7ACd7xaIhCXkepXweE2IPe4gb2+uT4RYYG7ENq5Et6lWj48OL0ryqHi4vbL0BnGtajOk/QLuLQFtG6RMT51d93xHv1espEGSt/qemOUhmr0/nIW9FPVs="
