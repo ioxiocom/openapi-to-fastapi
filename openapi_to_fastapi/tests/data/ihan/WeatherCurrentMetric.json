@@ -1,0 +1,172 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Current Weather (Metric)",
+    "description": "Data Product for current weather with metric units",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/Weather/Current/Metric": {
+      "post": {
+        "summary": "Weather/Current/Metric Data Product",
+        "description": "Current weather in metric units",
+        "operationId": "requestCurrentWeatherMetricData",
+        "parameters": [
+          {
+            "description": "HMAC-RSA256 signature for the request using Product Gateway's public key",
+            "required": false,
+            "schema": {
+              "title": "Request signature",
+              "type": "string",
+              "description": "HMAC-RSA256 signature for the request using Product Gateway's public key"
+            },
+            "name": "x-signature",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CurrentWeatherMetricRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentWeatherMetricResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CurrentWeatherMetricRequest": {
+        "title": "CurrentWeatherMetricRequest",
+        "required": ["lat", "lon"],
+        "type": "object",
+        "properties": {
+          "lat": {
+            "title": "Latitude",
+            "maximum": 90,
+            "minimum": -90,
+            "type": "number",
+            "description": "The latitude coordinate of the desired location",
+            "example": 60.192059
+          },
+          "lon": {
+            "title": "Longitude",
+            "maximum": 180,
+            "minimum": -180,
+            "type": "number",
+            "description": "The longitude coordinate of the desired location",
+            "example": 24.945831
+          }
+        }
+      },
+      "CurrentWeatherMetricResponse": {
+        "title": "CurrentWeatherMetricResponse",
+        "required": [
+          "humidity",
+          "pressure",
+          "rain",
+          "temp",
+          "windSpeed",
+          "windDirection"
+        ],
+        "type": "object",
+        "properties": {
+          "humidity": {
+            "title": "Current relative air humidity in %",
+            "type": "number",
+            "example": 72
+          },
+          "pressure": {
+            "title": "Current air pressure in hPa",
+            "type": "number",
+            "example": 1007
+          },
+          "rain": {
+            "title": "Rain status",
+            "type": "boolean",
+            "description": "If it's currently raining or not."
+          },
+          "temp": {
+            "title": "Current temperature in Celsius",
+            "minimum": -273.15,
+            "type": "number",
+            "example": 17.3
+          },
+          "windSpeed": {
+            "title": "Current wind speed in m/s",
+            "minimum": 0,
+            "type": "number",
+            "example": 2.1
+          },
+          "windDirection": {
+            "title": "Current wind direction in meteorological wind direction degrees",
+            "maximum": 360,
+            "minimum": 0,
+            "type": "number",
+            "example": 220
+          }
+        }
+      },
+      "HTTPValidationError": {
+        "title": "HTTPValidationError",
+        "type": "object",
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "title": "ValidationError",
+        "required": ["loc", "msg", "type"],
+        "type": "object",
+        "properties": {
+          "loc": {
+            "title": "Location",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
