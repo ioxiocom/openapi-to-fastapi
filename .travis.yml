@@ -27,14 +27,12 @@ before_deploy:
   - poetry config repositories.testpypi https://test.pypi.org/legacy/
   - poetry config pypi-token.testpypi $PYPI_PASSWORD
   - poetry config pypi-token.pypi $PYPI_PASSWORD
-  - poetry build
 
 deploy:
-  - provider: pypi
+  - provider: script
     skip_existing: true
-    username: "__token__"
-    password: $PYPI_PASSWORD
-    server: https://test.pypi.org/legacy/
+    script:
+      - poetry publish -r testpypi --build
     on:
       branch: feature/parser-and-validator
-#      tags: true
+      tags: true
