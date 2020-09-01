@@ -3,8 +3,9 @@ python:
   - 3.8
 
 install:
+  - nvm install
   - pip install poetry pre-commit
-  - poetry config settings.virtualenvs.in-project true
+  - poetry config virtualenvs.in-project true
   - poetry install
 
 script:
