@@ -155,7 +155,10 @@ def test_routes_meta_info_custom_name(app, client, specs_root):
         return path[1:]
 
     routes = RoutesMapping(
-        default_post=RouteInfo(factory=make_post_route, name_factory=name_factory,)
+        default_post=RouteInfo(
+            factory=make_post_route,
+            name_factory=name_factory,
+        )
     )
     router = make_router_from_specs(specs_root / "ihan", routes)
     route = [r for r in router.routes if r.path == "/Company/BasicInfo"][0]
