@@ -1,4 +1,5 @@
 import json
+from typing import Callable, Optional
 
 import pydantic
 import pytest
@@ -6,6 +7,14 @@ from fastapi import Header
 
 from openapi_to_fastapi.model_generator import load_models
 from openapi_to_fastapi.routes import RoutesMapping, make_router_from_specs
+
+# values aligned with the response defined in the data/ihan/CompanyBasicInfo.json
+company_basic_info_resp = {
+    "name": "Company",
+    "companyId": "test",
+    "companyForm": "Form",
+    "registrationDate": "Long ago",
+}
 
 
 def test_routes_are_created(ihan_client, specs_root):
@@ -49,45 +58,37 @@ def test_weather_route_payload_errors(ihan_client, snapshot):
     snapshot.assert_match(resp.json(), "Incorrect payload type")
 
 
-def test_weather_route_fetch(ihan_client):
-    resp = ihan_client.post(
-        "/Weather/Current/Metric", json={"lat": "30.5", "lon": 1.56}
-    )
-    assert resp.status_code == 200
-    assert resp.json() == {}
-
-
-def test_weather_route_custom_default_route(app, client, specs_root, snapshot):
-    def make_post_route(model):
-        def _route(request: model):
-            return {"customDefault": ""}
+def test_company_custom_post_route(app, client, specs_root, snapshot):
+    def make_post_route(req_model, resp_model):
+        def _route(request: req_model):
+            return company_basic_info_resp
 
         return _route
 
     routes = RoutesMapping(default_post=make_post_route)
     app.include_router(make_router_from_specs(specs_root / "ihan", routes))
-    resp = client.post("/Weather/Current/Metric", json={"lat": "30.5", "lon": 1.56})
-    assert resp.status_code == 200
-    assert resp.json() == {"customDefault": ""}
+    resp = client.post("/Company/BasicInfo", json={"companyId": "test"})
+    assert resp.status_code == 200, resp.json()
+    assert resp.json() == company_basic_info_resp
 
 
 def test_weather_route_custom_route(app, client, specs_root, snapshot):
-    def make_post_route(model):
-        def _route(request: model):
-            return {"customRoute": ""}
+    def make_post_route(req_model, resp_model):
+        def _route(request: req_model):
+            return company_basic_info_resp
 
         return _route
 
-    routes = RoutesMapping(post_map={"/Weather/Current/Metric": make_post_route})
+    routes = RoutesMapping(post_map={"/Company/BasicInfo": make_post_route})
     app.include_router(make_router_from_specs(specs_root / "ihan", routes))
-    resp = client.post("/Weather/Current/Metric", json={"lat": "30.5", "lon": 1.56})
+    resp = client.post("/Company/BasicInfo", json={"companyId": "test"})
     assert resp.status_code == 200
-    assert resp.json() == {"customRoute": ""}
+    assert resp.json() == company_basic_info_resp
 
 
 def test_custom_route_definitions(app, client, specs_root, snapshot):
     # Add required query param and a header
-    def make_post_route(model):
+    def make_post_route(model, *args):
         def _route(request: model, vendor: str, auth_header: str = Header(...)):
             return {"customRoute": ""}
 
@@ -98,3 +99,18 @@ def test_custom_route_definitions(app, client, specs_root, snapshot):
     resp = client.post("/Weather/Current/Metric", json={"lat": "30.5", "lon": 1.56})
     assert resp.status_code == 422
     snapshot.assert_match(resp.json(), "Custom route definition")
+
+
+def test_response_model_is_parsed(app, client, specs_root):
+    resp_model: Optional[Callable] = None
+
+    def make_post_route(req_model, _resp_model):
+        nonlocal resp_model
+        resp_model = _resp_model
+        return lambda request: {}
+
+    routes = RoutesMapping(default_post=make_post_route)
+    app.include_router(make_router_from_specs(specs_root / "ihan", routes))
+    assert resp_model is not None
+    with pytest.raises(pydantic.ValidationError):
+        resp_model()

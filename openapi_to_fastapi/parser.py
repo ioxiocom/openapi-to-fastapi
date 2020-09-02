@@ -70,10 +70,11 @@ def parse_operation(spec: dict, name: str) -> Optional[Operation]:
     if request_body_model:
         operation.requestBodyModel = request_body_model
 
+    operation.responseModels = {}
     for resp_code, resp_data in data.get("responses", {}).items():
         code = int(resp_code)
         model_name = get_model_name_from_ref(resp_data)
-        if model_name and operation.responseModels:
+        if model_name:
             operation.responseModels[code] = model_name
 
     return operation

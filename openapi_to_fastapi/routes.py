@@ -17,8 +17,10 @@ class EmptyModel(pydantic.BaseModel):
     pass
 
 
-def make_dummy_route(model: Type[pydantic.BaseModel]):
-    def _route(request: model):  # type: ignore
+def make_dummy_route(
+    request_model: Type[pydantic.BaseModel], response_model: Type[pydantic.BaseModel]
+):
+    def _route(request: request_model):  # type: ignore
         return {}
 
     return _route
@@ -42,25 +44,26 @@ def add_route(
 ):
 
     operation: Operation = getattr(path_item, method)
-    resp_models = {}
-    if operation.responseModels:
-        for code, model_name in operation.responseModels.items():
-            resp_models[code] = getattr(models_module, model_name)
+    resp_model = None
+    if operation.responseModels and operation.responseModels.get(200):
+        resp_model = getattr(models_module, operation.responseModels[200])
 
     router_method = getattr(api_router, method, None)
     if not router_method:
         raise ValueError("Unsupported HTTP method")
 
     if operation.requestBodyModel:
-        model = getattr(models_module, operation.requestBodyModel, None)
+        request_model = getattr(models_module, operation.requestBodyModel, None)
     else:
-        model = EmptyModel
+        request_model = EmptyModel
 
     routes_map = getattr(routes, f"{method}_map") or {}
     make_route = routes_map.get(path)
     if make_route is None:
         make_route = getattr(routes, f"default_{method}")
-    router_method(path)(make_route(model))
+    router_method(path, response_model=resp_model)(
+        make_route(request_model, resp_model)
+    )
 
 
 def make_router_from_specs(
