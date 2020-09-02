@@ -7,7 +7,7 @@ import pydantic
 from fastapi import APIRouter
 
 from .model_generator import load_models
-from .models import Operation, PathItem
+from .models import Operation
 from .parser import parse_openapi_spec
 from .validator import BaseValidator
 from .validator.core import DefaultValidator
@@ -30,6 +30,7 @@ def make_dummy_route(
 class RouteInfo:
     factory: Callable = make_dummy_route
     name: Optional[str] = None
+    name_factory: Optional[Callable] = None
     description: Optional[str] = None
     response_description: Optional[str] = None
     tags: Optional[List[str]] = None
@@ -47,12 +48,11 @@ def add_route(
     api_router: APIRouter,
     path: str,
     method: str,
-    path_item: PathItem,
+    operation: Operation,
     routes: RoutesMapping,
     models_module,
 ):
 
-    operation: Operation = getattr(path_item, method)
     resp_model = None
     if operation.responseModels and operation.responseModels.get(200):
         resp_model = getattr(models_module, operation.responseModels[200])
@@ -70,11 +70,16 @@ def add_route(
     route_info: Optional[RouteInfo] = routes_map.get(path)
     if route_info is None:
         route_info = getattr(routes, f"default_{method}")
+
+    route_name = route_info.name
+    if route_info.name_factory:
+        route_name = route_info.name_factory(path=path, operation=operation)
+
     router_method(
         path,
         response_model=resp_model,
-        name=route_info.name,
-        description=route_info.description,
+        name=route_name,
+        description=route_info.description or operation.description,
         tags=route_info.tags,
         response_description=route_info.response_description,
     )(route_info.factory(request_model, resp_model))
@@ -120,6 +125,6 @@ def validate_spec_and_create_routes(
     for name, path_item in parse_openapi_spec(spec).items():
         models = load_models(raw_spec, name)
         if path_item.post:
-            add_route(router, name, "post", path_item, routes, models)
+            add_route(router, name, "post", path_item.post, routes, models)
         if path_item.get:
-            add_route(router, name, "get", path_item, routes, models)
+            add_route(router, name, "get", path_item.get, routes, models)

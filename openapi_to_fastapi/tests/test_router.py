@@ -142,3 +142,24 @@ def test_routes_meta_info(app, client, specs_root):
     assert route.tags == ["Routes"]
     assert route.description == "Route description"
     assert route.response_description == "Response description"
+
+
+def test_routes_meta_info_custom_name(app, client, specs_root):
+    def make_post_route(req_model, resp_model):
+        def _route(request: req_model):
+            return {}
+
+        return _route
+
+    def name_factory(path="", **kwargs):
+        return path[1:]
+
+    routes = RoutesMapping(
+        default_post=RouteInfo(factory=make_post_route, name_factory=name_factory,)
+    )
+    router = make_router_from_specs(specs_root / "ihan", routes)
+    route = router.routes[0]
+
+    assert route.name == "Company/BasicInfo"
+    # description by default is coming from spec
+    assert route.description == "Information about the company"

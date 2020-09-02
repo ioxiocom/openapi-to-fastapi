@@ -14,3 +14,4 @@ class Operation(oas.Operation):
 
 class PathItem(oas.PathItem):
     post: Optional[Operation] = None
+    get: Optional[Operation] = None
