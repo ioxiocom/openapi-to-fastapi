@@ -19,15 +19,15 @@ repos:
       - id: isort
         language_version: python3.8
   - repo: https://github.com/psf/black
-    rev: stable
+    rev: 20.8b1
     hooks:
       - id: black
         language_version: python3.8
   - repo: https://github.com/prettier/prettier
-    rev: master
+    rev: 2.1.1
     hooks:
       - id: prettier
   - repo: https://gitlab.com/pycqa/flake8
-    rev: master
+    rev: 3.8.3
     hooks:
       - id: flake8
