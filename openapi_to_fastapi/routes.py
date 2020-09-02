@@ -27,11 +27,20 @@ def make_dummy_route(
 
 
 @dataclass
+class RouteInfo:
+    factory: Callable = make_dummy_route
+    name: Optional[str] = None
+    description: Optional[str] = None
+    response_description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+@dataclass
 class RoutesMapping:
-    default_post: Callable = make_dummy_route
-    default_get: Callable = make_dummy_route
-    post_map: Optional[Dict[str, Callable]] = None
-    get_map: Optional[Dict[str, Callable]] = None
+    default_post: RouteInfo = RouteInfo()
+    default_get: RouteInfo = RouteInfo()
+    post_map: Optional[Dict[str, RouteInfo]] = None
+    get_map: Optional[Dict[str, RouteInfo]] = None
 
 
 def add_route(
@@ -58,12 +67,17 @@ def add_route(
         request_model = EmptyModel
 
     routes_map = getattr(routes, f"{method}_map") or {}
-    make_route = routes_map.get(path)
-    if make_route is None:
-        make_route = getattr(routes, f"default_{method}")
-    router_method(path, response_model=resp_model)(
-        make_route(request_model, resp_model)
-    )
+    route_info: Optional[RouteInfo] = routes_map.get(path)
+    if route_info is None:
+        route_info = getattr(routes, f"default_{method}")
+    router_method(
+        path,
+        response_model=resp_model,
+        name=route_info.name,
+        description=route_info.description,
+        tags=route_info.tags,
+        response_description=route_info.response_description,
+    )(route_info.factory(request_model, resp_model))
 
 
 def make_router_from_specs(

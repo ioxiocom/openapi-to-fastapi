@@ -6,7 +6,7 @@ import pytest
 from fastapi import Header
 
 from openapi_to_fastapi.model_generator import load_models
-from openapi_to_fastapi.routes import RoutesMapping, make_router_from_specs
+from openapi_to_fastapi.routes import RouteInfo, RoutesMapping, make_router_from_specs
 
 # values aligned with the response defined in the data/ihan/CompanyBasicInfo.json
 company_basic_info_resp = {
@@ -65,7 +65,7 @@ def test_company_custom_post_route(app, client, specs_root, snapshot):
 
         return _route
 
-    routes = RoutesMapping(default_post=make_post_route)
+    routes = RoutesMapping(default_post=RouteInfo(factory=make_post_route))
     app.include_router(make_router_from_specs(specs_root / "ihan", routes))
     resp = client.post("/Company/BasicInfo", json={"companyId": "test"})
     assert resp.status_code == 200, resp.json()
@@ -79,7 +79,9 @@ def test_weather_route_custom_route(app, client, specs_root, snapshot):
 
         return _route
 
-    routes = RoutesMapping(post_map={"/Company/BasicInfo": make_post_route})
+    routes = RoutesMapping(
+        post_map={"/Company/BasicInfo": RouteInfo(factory=make_post_route)}
+    )
     app.include_router(make_router_from_specs(specs_root / "ihan", routes))
     resp = client.post("/Company/BasicInfo", json={"companyId": "test"})
     assert resp.status_code == 200
@@ -94,7 +96,9 @@ def test_custom_route_definitions(app, client, specs_root, snapshot):
 
         return _route
 
-    routes = RoutesMapping(post_map={"/Weather/Current/Metric": make_post_route})
+    routes = RoutesMapping(
+        post_map={"/Weather/Current/Metric": RouteInfo(factory=make_post_route)}
+    )
     app.include_router(make_router_from_specs(specs_root / "ihan", routes))
     resp = client.post("/Weather/Current/Metric", json={"lat": "30.5", "lon": 1.56})
     assert resp.status_code == 422
@@ -109,8 +113,32 @@ def test_response_model_is_parsed(app, client, specs_root):
         resp_model = _resp_model
         return lambda request: {}
 
-    routes = RoutesMapping(default_post=make_post_route)
+    routes = RoutesMapping(default_post=RouteInfo(factory=make_post_route))
     app.include_router(make_router_from_specs(specs_root / "ihan", routes))
     assert resp_model is not None
     with pytest.raises(pydantic.ValidationError):
         resp_model()
+
+
+def test_routes_meta_info(app, client, specs_root):
+    def make_post_route(req_model, resp_model):
+        def _route(request: req_model):
+            return {}
+
+        return _route
+
+    routes = RoutesMapping(
+        default_post=RouteInfo(
+            factory=make_post_route,
+            name="The Route",
+            tags=["Routes"],
+            description="Route description",
+            response_description="Response description",
+        )
+    )
+    router = make_router_from_specs(specs_root / "ihan", routes)
+    route = router.routes[0]
+    assert route.name == "The Route"
+    assert route.tags == ["Routes"]
+    assert route.description == "Route description"
+    assert route.response_description == "Response description"
