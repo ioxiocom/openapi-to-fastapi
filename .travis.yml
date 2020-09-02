@@ -18,9 +18,7 @@ install:
   - poetry install
 
 script:
-  - pre-commit run --all-files
-  - poetry run pytest
-  - poetry run mypy openapi_to_fastapi
+  - poetry run invoke test
 
 before_deploy:
   - poetry config repositories.testpypi https://test.pypi.org/legacy/
