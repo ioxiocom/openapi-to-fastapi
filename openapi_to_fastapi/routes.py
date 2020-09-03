@@ -28,20 +28,20 @@ def make_dummy_route(
 
 @dataclass
 class RouteInfo:
+    description: Optional[str] = None
     factory: Callable = make_dummy_route
     name: Optional[str] = None
     name_factory: Optional[Callable] = None
-    description: Optional[str] = None
     response_description: Optional[str] = None
     tags: Optional[List[str]] = None
 
 
 @dataclass
 class RoutesMapping:
-    default_post: RouteInfo = RouteInfo()
     default_get: RouteInfo = RouteInfo()
-    post_map: Optional[Dict[str, RouteInfo]] = None
+    default_post: RouteInfo = RouteInfo()
     get_map: Optional[Dict[str, RouteInfo]] = None
+    post_map: Optional[Dict[str, RouteInfo]] = None
 
 
 def add_route(

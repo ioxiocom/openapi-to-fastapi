@@ -8,7 +8,8 @@ cache:
     - $HOME/.cache/pypoetry
 
 env:
-  secure: "DFvt19Pjl7XvfEFX+yXKy7Nkvz7n2qbVn3qVw68neeu/0Yf79IjZ7sORtGRtlUOIvYmlnZRApd61v09E9nEP/xcRa5rpCBKedANwla9zI9DOWxC4l3gJXW1SiZGgxZBgXIK9vvDBfai8N5CArgTMt4r+tK+RGdyqSisZ/TCsF0gud2PEy0ImyPlW6T76pVOmOaL8OHEQj0Bppqsr7J3CTM95h4HEouhIayT7oqygyjToBaQz+ltkJ7Zrn13Voqc2NLoNZ7Ap4EVM1Isc81kmiXTeZFr8kfi+TwJMDG3PwltGba1k+1NOZm4hPCc45R+SKgTEQwTB/HfesDKEiDBGQKDO2gFyIFIRm8Uz130ltABp/w9IFjqNZqRO5ozYgypyThkEVPtzkFBMNdJczgW6qNRMDZIRZTPzWCNx02+eANuoJ9R9P6wb3Dam5qyNE4FEPnM8kYxi4Z57lcfA5KtFuNNG2oTuT0U1ZTs3cETu7g2Bco5bOv21cz2sinimxj4sfrbhGYNWlcUSfGEpJEHfDHJ0ibjAB9mx69/am6dSN38FFEXlGikBDRB7ACd7xaIhCXkepXweE2IPe4gb2+uT4RYYG7ENq5Et6lWj48OL0ryqHi4vbL0BnGtajOk/QLuLQFtG6RMT51d93xHv1espEGSt/qemOUhmr0/nIW9FPVs="
+  - secure: "AldmXPcSONiuvFKlyJ7ISn0Ss4Y9b//+2NLhVjspLibx/io+1tkLW7YBFS6eJqEoRGRO6npI4k6bFhVx87EWHFzVzn/Kt4byqBc295+WthH4VVYjg6BgsicOF9lUJjKaeHj03V1obSvPvw+rEDxcIgwiu1UYOt6SPSoGF7TGd6l87TXKMEiIbIn9SSVSxZyByXI7yMkMhtjxRC/EJjcaINkC4XAm/fNljqI80hXJSv1zrsnRLVJTtDmHPq+1iTKsDYTw9aHciSJ4qO22yCbPuRz2ElQs9yVfgSgV6S6uUFP4jeU8CjGO1XhQJOWoPQfHQDQU8GhodYoYuE6x4R6TR0/2nE8AvmIkwnxdbavoW3FCjABFq4ZhLlb1X8iIfP02QU02NESFKWMk3HusEZhg+/Om0PiqnE/f80wLmQKEaXxEFfGXDfg93LGzEG71MU3KiuCR9QGcvF0A/Qh3ZzubxFKzdZ2JVEdsu7bmGZ3ed3h8TF6WeIKu6Fld5/04erXbjBdkD1No3Dl20ZjPO7D6TRrVIeiQCH9/U2/+U6LJpzy32zlU7ARYgglfL0Ou6qUsvbdRbB0BqIjhbzX6jQpw/wo6fhxQwkDejMPMa6psogP9SSdYWHo9Dy3H9UmZBREaYfdNQf8kwfS50+bVhUQHxlMZekjpyXd/qnMRAXvZvyU="
+  - secure: "a32/eWhyDDr7GOwP77ywYiIbTyczjuaVvNdEucrKPNl7q1m2rpwC+whRRKeZOqvdsx6SRgXqYWoqKy74UsGM7YZv8XL/F2Th17F/RERS/FYCVq87xuSbu/bnNrLa6V0wlOB9C4PnER6gO+nC0DcP2E9oIogwjrepjnCsYQPSSxRUweac/n5FCq3TPFGAU0KpxLMyrwDO1rgcDwh5KPOJ8UNGHkbmd0tlkp7y7QIl313lSbvidHcfkJhhsqx5E6aQBcSqkmGLQtUctFs7NMUgwz9/4sROFvRHhlK8YAJ/L/g01tPqzvW/zVqTa+q7FXNT+4k1eMjwxYDf6QI/hX73kxIYRNDaJrfBQo7uePbt1KpYKCWPk+cYEh4ASFzVMD9TwO6Rm/DoSoAyumYMEXle8qSs7wt9DN7SPGLnOWBj/rGsw9fT3KZzalkjEYOtyxgySVgtplY6GKNYexZ7MPsQLY3B/KoOIwTqcZe8gJobM0N+pk6vXR82/Hv2roQi63DLmlelkzQMDBJ6VYikkRQbHks0p2/D8EFj27ENHYQyLEP7XC7fHisstoUnU4aKgvXDyedPra4JB8NkyZfdXPuieRVZBgB4fvgd+ZdQuaNjn6ZPlkDS1FE0eP26TSbM2dlbXpQDLesJjBcGZIvW+hOUp4yHDjDIttsi7jdGZdX7I30="
 
 before_install:
   - nvm install
@@ -22,14 +23,15 @@ script:
 
 before_deploy:
   - poetry config repositories.testpypi https://test.pypi.org/legacy/
-  - poetry config pypi-token.testpypi $PYPI_PASSWORD
+  - poetry config pypi-token.testpypi $PYPI_TEST_PASSWORD
   - poetry config pypi-token.pypi $PYPI_PASSWORD
 
 deploy:
   - provider: script
     skip_existing: true
     script:
-      - poetry publish -r testpypi --build
+      # add "-r testpypi" for publishing to https://test.pypi.org
+      - poetry publish --build
     on:
-      branch: feature/parser-and-validator
+      branch: master
       tags: true

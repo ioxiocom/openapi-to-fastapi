@@ -46,23 +46,8 @@ def cli_validate_specs(path: str, validator, module):
     sys.exit(validate_specs(Path(path), module, validator))
 
 
-def validate_specs(path: Path, plugins: List[str], extra_validators: List[str]) -> int:
-    validators = [DefaultValidator]
-    validator_modules = [ihan_standards]
-    for module_path in plugins:
-        module_name = f"oas_models_{uuid.uuid4()}"
-        spec = importlib.util.spec_from_file_location(module_name, module_path)
-        if spec.loader:
-            validator_modules.append(spec.loader.load_module(module_name))
-    for name in extra_validators:
-        for validator_module in validator_modules:
-            validator = getattr(validator_module, name, None)
-            if validator and issubclass(validator, BaseValidator):
-                validators.append(validator)
-                break
-        else:
-            raise ValueError(f"Failed to load validator: {name}")
-
+def validate_specs(path: Path, modules: List[str], extra_validators: List[str]) -> int:
+    validators = _load_validators(extra_validators, modules)
     with header():
         logger.info(f"OpenAPI specs root path: {path}")
         logger.info("Validators: %s", ", ".join([v.__name__ for v in validators]))
@@ -88,3 +73,30 @@ def validate_specs(path: Path, plugins: List[str], extra_validators: List[str]) 
         log(f"Passed: {passed}")
         log(f"Failed: {failed}")
     return failed
+
+
+def _load_extra_validator_modules(modules: List[str]) -> list:
+    validator_modules = [ihan_standards]
+    for module_path in modules:
+        module_name = f"oas_models_{uuid.uuid4()}"
+        spec = importlib.util.spec_from_file_location(module_name, module_path)
+        if spec.loader:
+            validator_modules.append(spec.loader.load_module(module_name))
+    return validator_modules
+
+
+def _load_validators(
+    validators: List[str],
+    extra_modules: List[str],
+) -> list:
+    _validators = [DefaultValidator]
+
+    for name in validators:
+        for validator_module in _load_extra_validator_modules(extra_modules):
+            validator = getattr(validator_module, name, None)
+            if validator and issubclass(validator, BaseValidator):
+                _validators.append(validator)
+                break
+        else:
+            raise ValueError(f"Failed to load validator: {name}")
+    return _validators
