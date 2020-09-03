@@ -11,8 +11,8 @@ def release(ctx):
     if match:
         version = match.group(1)
         print(f"Releasing v{version}")
-        ctx.run(f"git tag v{version}")
-        ctx.run(f"git tag v{version}")
+        ctx.run(f"git tag v{version}", echo=True)
+        ctx.run(f"git push origin v{version}", echo=True)
     else:
         print("Failed to find version in the pyproject.toml")
 
@@ -26,12 +26,16 @@ def run_test_cmd(ctx, cmd) -> int:
 @task
 def test(ctx):
     failed_commands = []
+
     if run_test_cmd(ctx, "pre-commit run --all-files"):
         failed_commands.append("Pre commit hooks")
+
     if run_test_cmd(ctx, "mypy openapi_to_fastapi"):
         failed_commands.append("Mypy")
+
     if run_test_cmd(ctx, "pytest"):
         failed_commands.append("Unit tests")
+
     if run_test_cmd(ctx, "flake8"):
         failed_commands.append("flake8")
 
