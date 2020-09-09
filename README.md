@@ -52,44 +52,60 @@ Imagine you have a following spec (some parts are cut off for brevity):
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/BasicCompanyInfoRequest",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BasicCompanyInfoResponse",
-  },
-  "components": {
-    "schemas": {
-      "BasicCompanyInfoRequest": {
-        "title": "BasicCompanyInfoRequest",
-        "required": ["companyId"],
-        "type": "object",
-        "properties": {
-          "companyId": {
-            "title": "Company Id",
-            "type": "string",
-            "example": "2464491-9"
+                "responses": {
+                  "200": {
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "$ref": "#/components/schemas/BasicCompanyInfoResponse"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
-      "BasicCompanyInfoResponse": {
-        "title": "BasicCompanyInfoResponse",
-        "required": ["name", "companyId", "companyForm"],
-        "type": "object",
-        "properties": {
-          "name": {
-            "title": "Name of the company",
-            "type": "string",
+      "components": {
+        "schemas": {
+          "BasicCompanyInfoRequest": {
+            "title": "BasicCompanyInfoRequest",
+            "required": ["companyId"],
+            "type": "object",
+            "properties": {
+              "companyId": {
+                "title": "Company Id",
+                "type": "string",
+                "example": "2464491-9"
+              }
+            }
           },
-          "companyId": {
-            "title": "ID of the company",
-            "type": "string",
-          },
-          "companyForm": {
-            "title": "The company form of the company",
-            "type": "string",
-          },
+          "BasicCompanyInfoResponse": {
+            "title": "BasicCompanyInfoResponse",
+            "required": ["name", "companyId", "companyForm"],
+            "type": "object",
+            "properties": {
+              "name": {
+                "title": "Name of the company",
+                "type": "string"
+              },
+              "companyId": {
+                "title": "ID of the company",
+                "type": "string"
+              },
+              "companyForm": {
+                "title": "The company form of the company",
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
 ```
 
 The FastAPI route equivalent could look like this:

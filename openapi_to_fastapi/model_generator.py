@@ -17,8 +17,6 @@ def generate_model_from_schema(schema: str) -> str:
     """
     Given an OpenAPI schema, generate pydantic models from everything defined
     in the "components/schemas" section
-    This function depends on the `datamodel-code-generator` library. Since it
-    can't return pydantic objects directly, result of this function is a python code
 
     :param schema: Content of an OpenAPI spec, plain text
     :return: Importable python code with generated models
