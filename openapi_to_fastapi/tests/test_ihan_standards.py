@@ -3,9 +3,8 @@ from copy import deepcopy
 from pathlib import Path
 
 import pytest
-from fastapi import APIRouter
 
-from ..routes import validate_spec_and_create_routes
+from ..routes import SpecRouter
 from ..validator import ihan_standards as ihan
 
 # Note: It's easier to get some 100% valid spec and corrupt it
@@ -17,15 +16,11 @@ COMPANY_BASIC_INFO: dict = json.loads(
 )
 
 
-_router = APIRouter()
-validators = [ihan.IhanStandardsValidator]
-
-
 def check_validation_error(tmp_path, spec: dict, exception):
     spec_path = tmp_path / "spec.json"
     spec_path.write_text(json.dumps(spec))
     with pytest.raises(exception):
-        validate_spec_and_create_routes(_router, spec_path, validators)
+        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
 
 
 @pytest.mark.parametrize("method", ["get", "put", "delete"])

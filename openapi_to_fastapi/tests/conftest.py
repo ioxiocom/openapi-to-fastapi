@@ -4,7 +4,7 @@ import pytest
 from fastapi import FastAPI
 from starlette.testclient import TestClient
 
-from openapi_to_fastapi.routes import RoutesMapping, make_router_from_specs
+from openapi_to_fastapi.routes import SpecRouter
 
 
 @pytest.fixture
@@ -25,5 +25,6 @@ def client(app):
 @pytest.fixture
 def ihan_client(specs_root):
     app = FastAPI()
-    app.include_router(make_router_from_specs(specs_root / "ihan", RoutesMapping()))
+    spec_router = SpecRouter(specs_root / "ihan")
+    app.include_router(spec_router.to_fastapi_router())
     return TestClient(app)

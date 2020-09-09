@@ -9,11 +9,10 @@ from typing import List
 
 import click
 import coloredlogs
-from fastapi import APIRouter
 
 from openapi_to_fastapi.validator.core import BaseValidator, DefaultValidator
 
-from .routes import validate_spec_and_create_routes
+from .routes import SpecRouter
 from .validator import ihan_standards
 
 logger = logging.getLogger("openapi_to_fastapi_cli")
@@ -56,7 +55,7 @@ def validate_specs(path: Path, modules: List[str], extra_validators: List[str]) 
     for spec_path in path.glob("**/*.json"):
         logger.info(f"File: {spec_path}")
         try:
-            validate_spec_and_create_routes(APIRouter(), spec_path, validators)
+            SpecRouter(spec_path, validators)
         except Exception:
             logger.error("\n%s", traceback.format_exc())
             logger.error("[FAILED]")

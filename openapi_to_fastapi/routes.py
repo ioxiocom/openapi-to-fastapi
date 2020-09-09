@@ -1,39 +1,37 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Sequence, Type
+from typing import Callable, Dict, List, Optional, Type, Union
 
 import pydantic
 from fastapi import APIRouter
 
 from .model_generator import load_models
-from .models import Operation
 from .parser import parse_openapi_spec
-from .validator import BaseValidator
+from .utils import add_annotation_to_first_argument, copy_function
 from .validator.core import DefaultValidator
 
 
-class EmptyModel(pydantic.BaseModel):
-    pass
-
-
-def make_dummy_route(
-    request_model: Type[pydantic.BaseModel], response_model: Type[pydantic.BaseModel]
-):
-    def _route(request: request_model):  # type: ignore
-        return {}
-
-    return _route
+def dummy_route(request):
+    """
+    Default handler to use if nothing was provided by user
+    :param request: Incoming request
+    :return: Empty JSON response
+    """
+    return {}
 
 
 @dataclass
 class RouteInfo:
     description: Optional[str] = None
-    factory: Callable = make_dummy_route
     name: Optional[str] = None
     name_factory: Optional[Callable] = None
-    response_description: Optional[str] = None
+    response_description: str = "Successful response"
     tags: Optional[List[str]] = None
+
+    request_model: Optional[Type[pydantic.BaseModel]] = None
+    response_model: Optional[Type[pydantic.BaseModel]] = None
+    handler: Callable = dummy_route
 
 
 @dataclass
@@ -44,87 +42,136 @@ class RoutesMapping:
     post_map: Optional[Dict[str, RouteInfo]] = None
 
 
-def add_route(
-    api_router: APIRouter,
-    path: str,
-    method: str,
-    operation: Operation,
-    routes: RoutesMapping,
-    models_module,
-):
+class SpecRouter:
+    def __init__(
+        self, specs_path: Union[str, Path], validators: Optional[List[Callable]] = None
+    ):
+        self._validators = [DefaultValidator] + (validators or [])
+        self._routes = RoutesMapping(post_map={}, get_map={})
 
-    resp_model = None
-    if operation.responseModels and operation.responseModels.get(200):
-        resp_model = getattr(models_module, operation.responseModels[200])
+        if isinstance(specs_path, str):
+            self.specs_path = Path(specs_path)
+        else:
+            self.specs_path = specs_path
 
-    router_method = getattr(api_router, method, None)
-    if not router_method:
-        raise ValueError("Unsupported HTTP method")
+        self._validate_and_parse_specs()
 
-    if operation.requestBodyModel:
-        request_model = getattr(models_module, operation.requestBodyModel, None)
-    else:
-        request_model = EmptyModel
+    def _validate_and_parse_specs(self):
+        """
+        Validate OpenAPI specs and parse required information from them
+        """
+        if self.specs_path.is_file():
+            specs = [self.specs_path]  # for CLI usage
+        else:
+            specs = self.specs_path.glob("**/*.json")
 
-    routes_map = getattr(routes, f"{method}_map") or {}
-    route_info: Optional[RouteInfo] = routes_map.get(path)
-    if route_info is None:
-        route_info = getattr(routes, f"default_{method}")
+        for spec_path in specs:
+            for validator in self._validators:
+                validator(spec_path).validate()
 
-    route_name = route_info.name
-    if route_info.name_factory:
-        route_name = route_info.name_factory(path=path, operation=operation)
+            raw_spec = spec_path.read_text()
+            json_spec = json.loads(raw_spec)
+            for path, path_item in parse_openapi_spec(json_spec).items():
+                models = load_models(raw_spec, path)
+                post = path_item.post
+                if post:
+                    req_model = getattr(models, post.requestBodyModel)
+                    route_info = RouteInfo(
+                        request_model=req_model, description=post.description
+                    )
+                    if post.responseModels and post.responseModels.get(200):
+                        resp_model = getattr(models, post.responseModels[200])
+                        route_info.response_model = resp_model
+                    self._routes.post_map[path] = route_info
 
-    router_method(
-        path,
-        response_model=resp_model,
-        name=route_name,
-        description=route_info.description or operation.description,
-        tags=route_info.tags,
-        response_description=route_info.response_description,
-    )(route_info.factory(request_model, resp_model))
+    def get_response_model(
+        self, path: str, method: str
+    ) -> Optional[Type[pydantic.BaseModel]]:
+        """
+        Get response model for a specific path
+        :param path: Path of the route, e.g "/pets"
+        :param method: HTTP Method, e.g "post" or "GET"
+        :return: Pydantic model with the fields defined in spec
+        """
+        store = getattr(self._routes, f"{method.lower()}_map", None)
+        if store is None:
+            raise ValueError("Unsupported HTTP method")
+        route_info: RouteInfo = store.get(path)
+        if not route_info:
+            return None
+        return route_info.response_model
 
+    def post(
+        self,
+        path: Optional[str] = None,
+        name: str = None,
+        tags: List[str] = None,
+        description: str = None,
+        response_description: str = None,
+        name_factory: Optional[Callable] = None,
+    ):
+        """
+        Define implementation for a specific POST route
+        If path argument is not provided, then this handler will be used in all POST
+        routes found in the OpenAPI spec
+        :param path: Path of the route, e.g "/pets"
+        :param name: Name of the route, mainly used in docs
+        :param name_factory: Function to generate route name from path.
+            It has precedence over `name` param
+        :param tags: Specific tags for docs
+        :param description: Route description. Got from OpenAPI spec by default
+        :param response_description: Description of the response
+        """
 
-def make_router_from_specs(
-    specs_path: Path,
-    routes: Optional[RoutesMapping] = None,
-    validators: List[Type[BaseValidator]] = None,
-) -> APIRouter:
-    """
-    Read OpenAPI specs from the file system and create routes for every endpoint
-    found in these specs
-    :param specs_path: Path to root directory of OpenAPI specs
-    :param routes: Structure pointing to the implementation of the routes
-    :param validators: Extra schema validators to run before creating the routes
-    :return: Configured APIRouter instance
-    """
-    api_router = APIRouter()
-    validators = validators or []
-    validators.insert(0, DefaultValidator)
+        def _wrapper(fn):
+            if path is None:
+                route_info = RouteInfo()
+                self._routes.default_post = route_info
+            else:
+                route_info = self._routes.post_map[path]
 
-    for openapi_spec_path in specs_path.glob("**/*.json"):
-        validate_spec_and_create_routes(
-            api_router, openapi_spec_path, validators, routes
-        )
-    return api_router
+            route_info.handler = fn
+            route_info.name = name
+            route_info.tags = tags
+            route_info.name_factory = name_factory
+            if response_description:
+                route_info.response_description = response_description
+            if description:
+                route_info.description = description
 
+            return fn
 
-def validate_spec_and_create_routes(
-    router: APIRouter,
-    spec_path: Path,
-    validators: Sequence[Type[BaseValidator]],
-    routes: Optional[RoutesMapping] = None,
-):
-    for validator in validators:
-        validator(spec_path).validate()
+        return _wrapper
 
-    raw_spec = spec_path.read_text()
-    spec = json.loads(raw_spec)
+    def to_fastapi_router(self):
+        """
+        Creates an instance of FastAPI router. Must be called after route definitions
+        :return: APIRouter instance
+        """
+        router = APIRouter()
 
-    routes = routes or RoutesMapping()
-    for name, path_item in parse_openapi_spec(spec).items():
-        models = load_models(raw_spec, name)
-        if path_item.post:
-            add_route(router, name, "post", path_item.post, routes, models)
-        if path_item.get:
-            add_route(router, name, "get", path_item.get, routes, models)
+        # POST methods
+        for path, route_info in self._routes.post_map.items():
+            resp_model = self.get_response_model(path, "post")
+            req_model = route_info.request_model
+
+            # if route is not customized, fall back to default POST
+            if route_info.handler == dummy_route:
+                route_info = self._routes.default_post
+
+            route_name = route_info.name
+            if route_info.name_factory:
+                route_name = route_info.name_factory(path)
+
+            handler = copy_function(route_info.handler)
+            add_annotation_to_first_argument(handler, req_model)  # noqa type: ignore
+
+            router.post(
+                path,
+                name=route_name,
+                description=route_info.description,
+                response_description=route_info.response_description,
+                response_model=resp_model,
+                tags=route_info.tags,
+            )(handler)
+        return router
