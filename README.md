@@ -42,7 +42,6 @@ Imagine you have a following spec (some parts are cut off for brevity):
 ```json
 {
   "openapi": "3.0.2",
-   ...
   "paths": {
     "/Company/BasicInfo": {
       "post": {
@@ -233,3 +232,7 @@ This validator can also be reused when generating routes:
 ```python
 router = SpecRouter(specs, validators=[MyValidator])
 ```
+
+## License
+
+This code is released under the BSD 3-Clause license. Details in the [LICENSE.md](./LICENSE.md) file.
