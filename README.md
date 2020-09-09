@@ -1,16 +1,16 @@
-## The reasoning
+## Reasoning
 
-There's an awesome [FastAPI](https://github.com/tiangolo/fastapi) library which simplifies the process of creating APIs.
-The one of the most exciting parts of it is the generation of OpenAPI specs out of the box.
+[FastAPI](https://github.com/tiangolo/fastapi) is an awesome framework that simplifies the process of creating APIs.
+One of the most exciting features is that it can generate OpenAPI specs out of the box.
 But what if.. you have an OpenAPI spec and you need to create an API from it?
 
-One day we met such problem — the need of creating an API from a multiple OpenAPI specs,
-and to make sure that requests which comes in and the responses which comes out are aligned
-with the models defined in those specs.
+One day we faced that problem — we had to create an API from multiple OpenAPI specs,
+and make sure that the incoming requests and the outgoing responses were aligned
+with the models defined the specs.
 
-> ⚠️ This library was created with an idea to cover only our needs first.
+> ⚠️ This library was created to cover only our own needs first.
 > So for now it's not suitable for everyone and has a lot of technical restrictions.
-> Please consider it as an experimental stuff
+> Please consider it as experimental stuff
 
 ## Installation
 
@@ -20,22 +20,22 @@ The package is available on PyPi:
 pip install openapi-to-fastapi
 ```
 
-## FastAPI routes generation
+## Generating FastAPI routes
 
-The main purpose of this library is to generate FastAPI routes from the OpenAPI specs.
+The main purpose of this library is to generate FastAPI routes from OpenAPI specs.
 This is done by:
 
 ```python
 from pathlib import Path
-from openapi_to_fastapi.routes import make_router_from_specs
+from openapi_to_fastapi.routes import SpecRouter
 
 specs = Path("./specs")
 
-router = make_router_from_specs(specs)
+router = SpecRouter(specs).to_fastapi_router()
 ```
 
-The code above will generate FastAPI router which then can be included into the main router,
-or just be used as the default one.
+The code above will create a FastAPI router that can be either included into the main router,
+or used as the default one.
 
 Imagine you have a following spec (some parts are cut off for brevity):
 
@@ -51,16 +51,13 @@ Imagine you have a following spec (some parts are cut off for brevity):
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BasicCompanyInfoRequest"
-    ...
+                "$ref": "#/components/schemas/BasicCompanyInfoRequest",
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BasicCompanyInfoResponse"
-
-    ...
+                  "$ref": "#/components/schemas/BasicCompanyInfoResponse",
   },
   "components": {
     "schemas": {
@@ -95,7 +92,7 @@ Imagine you have a following spec (some parts are cut off for brevity):
           },
 ```
 
-The FastAPI route equivalent could look like:
+The FastAPI route equivalent could look like this:
 
 ```python
 class BasicCompanyInfoRequest(pydantic.BaseModel):
@@ -113,7 +110,7 @@ def _route(request: BasicCompanyInfoRequest):
 
 ```
 
-And the `openapi-to-fastapi` is in charge of creating it automagically.
+And `openapi-to-fastapi` can create it automagically.
 
 ### Custom routes
 
@@ -122,39 +119,25 @@ In most cases it makes no sense to create an API without any business logic.
 Here's how to define it:
 
 ```python
-# Define a function which returns an usual valid FastAPI route.
-# It takes 2 pydantic models as arguments — defining request and response bodies
-def default_post_route(request_model, response_model):
+from fastapi import Header, HTTPException
+from openapi_to_fastapi.routes import SpecRouter
 
-    def _route(request: request_model, x_my_token: str = Header(...)):
-        if x_my_token != "my_token":
-            raise HTTPException(status_code=403, detail="Sorry")
-        return {"Hello": "World"}
+spec_router = SpecRouter("./specs")
 
-    return _route
+# Default handler for all POST endpoints found in the spec
+@spec_router.post()
+def hello_world(params, x_my_token: str = Header(...)):
+    if x_my_token != "my_token":
+        raise HTTPException(status_code=403, detail="Sorry")
+    return {"Hello": "World"}
 
-def create_pet(request_model, response_model):
-
-    # imagine line @router.post("/pet", response_model=response_model) here
-    def _route(request: request_model):
-        pet = db.make_pet(name=request.name)
+# Specific endpoint for a "/pet" route
+@spec_router.post("/pet")
+def create_pet(params):
+        pet = db.make_pet(name=params.name)
         return pet.to_dict()
 
-    return _route
-
-
-from openapi_to_fastapi.routes import RoutesMapping, RouteInfo
-
-routes = RoutesMapping(
-        # all POST routes found in the spec will be created with this default handler
-        default_post=RouteInfo(factory=default_post_route),
-        # custom handlers for POST methods
-        post_map={
-            # custom handler for POST method to /pet
-            "/pet": RouteInfo(factory=create_pet)
-        }
-    )
-router = make_router_from_specs(specs, routes)
+router = spec_router.to_fastapi_router()
 ```
 
 ### API Documentation
@@ -166,24 +149,27 @@ Request and response models are already handled. But to display documentation ni
 needs to assign a name for each endpoint. Here is how you can provide such name:
 
 ```python
-from openapi_to_fastapi.routes import RoutesMapping, RouteInfo
-from openapi_to_fastapi.models import Operation
+from openapi_to_fastapi.routes import SpecRouter
 
-route_info = RouteInfo(
-    factory=create_pet,
+spec_router = SpecRouter("./specs")
+
+@spec_router.post(
+    "/pet",
     name="Create a pet",
+    description="Create a pet",
     response_description="A Pet",
     tags=["pets"],
 )
+def create_pet(params):
+    return {}
 
-# Or you can set the dynamic name based on API path and Operation structure
-def name_factory(path: str, operation: Operation, **kwargs):
+# Or you can set the dynamic name based on API path
+def name_factory(path: str, **kwargs):
     return path.replace("/", " ")
 
-route_info = RouteInfo(
-    factory=proxy_route,
-    name=name_factory,
-)
+@spec_router.post(name_factory=name_factory)
+def create_pet(params):
+    return {}
 
 ```
 
@@ -192,7 +178,7 @@ route_info = RouteInfo(
 This package also provides a CLI entrypoint to validate OpenAPI specs. It's especially useful when you need to define
 you own set of rules for validation.
 
-Imagine your API specs are stored in the separate repository and maintained by another team.
+Imagine your API specs are stored in a separate repository and maintained by another team.
 You also expect that all OpenAPI specs have only one endpoint defined (some internal agreement).
 
 Now you can set up a CI check and validate them on every push.
@@ -242,8 +228,8 @@ Failed: 0
 ===============================================================================
 ```
 
-This validator can also be reused during routes generation:
+This validator can also be reused when generating routes:
 
 ```python
-router = make_router_from_specs(specs, routes, validators=[MyValidator])
+router = SpecRouter(specs, validators=[MyValidator])
 ```
