@@ -72,7 +72,7 @@ def validate_specs(path: Path, modules: List[str], extra_validators: List[str]) 
         log(f"Total : {passed+failed}")
         log(f"Passed: {passed}")
         log(f"Failed: {failed}")
-    return failed
+    return 1 if failed else 0
 
 
 def _load_extra_validator_modules(modules: List[str]) -> list:
