@@ -22,10 +22,7 @@ class MissingParameter(OpenApiValidationError):
 
 class BaseValidator:
     def __init__(self, path: Union[str, Path]):
-        if isinstance(path, str):
-            self.path = Path(path)
-        else:
-            self.path = path
+        self.path = Path(path)
 
     def validate(self):
         try:
