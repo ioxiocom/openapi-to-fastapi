@@ -42,7 +42,25 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "Authorization",
+            "description": "User bearer token"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "X-Authorization-Provider",
+            "description": "Provider domain"
+          }
+        ]
       }
     }
   },

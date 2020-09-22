@@ -8,7 +8,7 @@ from fastapi.openapi import models as oas
 
 
 class Operation(oas.Operation):
-    requestBodyModel: Optional[str] = None
+    requestBodyModel: Optional[str] = ""
     responseModels: Optional[Dict[int, str]] = None
 
 

@@ -21,6 +21,10 @@ def dummy_route(request):
     return {}
 
 
+class EmptyBody(pydantic.BaseModel):
+    pass
+
+
 @dataclass
 class RouteInfo:
     description: Optional[str] = None
@@ -77,7 +81,7 @@ class SpecRouter:
                 models = load_models(raw_spec, path)
                 post = path_item.post
                 if post:
-                    req_model = getattr(models, post.requestBodyModel)
+                    req_model = getattr(models, post.requestBodyModel, EmptyBody)
                     route_info = RouteInfo(
                         request_model=req_model, description=post.description
                     )
