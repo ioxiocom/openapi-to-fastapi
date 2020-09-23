@@ -90,7 +90,7 @@ def validate_spec(spec: dict):
     if not component_schemas:
         raise SchemaMissing('No "components/schemas" section defined')
 
-    if post_route.get("requestBody") and post_route["requestBody"].get("content"):
+    if post_route.get("requestBody", {}).get("content"):
         validate_component_schema(post_route["requestBody"], component_schemas)
 
     responses = post_route.get("responses", {})
