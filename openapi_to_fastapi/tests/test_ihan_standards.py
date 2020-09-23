@@ -50,10 +50,12 @@ def test_no_endpoints(tmp_path):
     check_validation_error(tmp_path, spec, ihan.NoEndpointsDefined)
 
 
-def test_missing_field_body(tmp_path):
+def test_missing_field_body_is_fine(tmp_path):
     spec = deepcopy(COMPANY_BASIC_INFO)
     del spec["paths"]["/Company/BasicInfo"]["post"]["requestBody"]
-    check_validation_error(tmp_path, spec, ihan.RequestBodyMissing)
+    spec_path = tmp_path / "spec.json"
+    spec_path.write_text(json.dumps(spec))
+    SpecRouter(spec_path, [ihan.IhanStandardsValidator])
 
 
 def test_missing_200_response(tmp_path):
@@ -107,3 +109,27 @@ def test_non_existing_component_defined_in_response(tmp_path):
     resp_200 = spec["paths"]["/Company/BasicInfo"]["post"]["responses"]["200"]
     resp_200["content"]["application/json"]["schema"]["$ref"] += "blah"
     check_validation_error(tmp_path, spec, ihan.SchemaMissing)
+
+
+def test_auth_header_is_missing(tmp_path):
+    spec = deepcopy(COMPANY_BASIC_INFO)
+    x_app_provider_header = {
+        "schema": {"type": "string"},
+        "in": "header",
+        "name": "X-Authorization-Provider",
+        "description": "Provider domain",
+    }
+    spec["paths"]["/Company/BasicInfo"]["post"]["parameters"] = [x_app_provider_header]
+    check_validation_error(tmp_path, spec, ihan.AuthorizationHeaderMissing)
+
+
+def test_auth_provider_header_is_missing(tmp_path):
+    spec = deepcopy(COMPANY_BASIC_INFO)
+    auth_header = {
+        "schema": {"type": "string"},
+        "in": "header",
+        "name": "Authorization",
+        "description": "User bearer token",
+    }
+    spec["paths"]["/Company/BasicInfo"]["post"]["parameters"] = [auth_header]
+    check_validation_error(tmp_path, spec, ihan.AuthProviderHeaderMissing)

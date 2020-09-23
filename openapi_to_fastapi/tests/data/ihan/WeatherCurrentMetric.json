@@ -22,6 +22,22 @@
             },
             "name": "x-signature",
             "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "X-Authorization-Provider",
+            "description": "Provider domain"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "Authorization",
+            "description": "User bearer token"
           }
         ],
         "requestBody": {

@@ -10,9 +10,9 @@ def release(ctx):
     match = re.search(r'version = "(.*?)"', toml)
     if match:
         version = match.group(1)
-        print(f"Releasing v{version}")
-        ctx.run(f"git tag v{version}", echo=True)
-        ctx.run(f"git push origin v{version}", echo=True)
+        print(f"Releasing {version}")
+        ctx.run(f"git tag {version}", echo=True)
+        ctx.run(f"git push origin {version}", echo=True)
     else:
         print("Failed to find version in the pyproject.toml")
 

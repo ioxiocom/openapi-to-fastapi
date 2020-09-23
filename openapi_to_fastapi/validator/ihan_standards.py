@@ -37,6 +37,14 @@ class ResponseBodyMissing(IhanStandardError):
     pass
 
 
+class AuthorizationHeaderMissing(IhanStandardError):
+    pass
+
+
+class AuthProviderHeaderMissing(IhanStandardError):
+    pass
+
+
 def validate_component_schema(spec: dict, components_schema: dict):
     if not spec["content"].get("application/json"):
         raise WrongContentType("Model description must be in application/json format")
@@ -82,16 +90,23 @@ def validate_spec(spec: dict):
     if not component_schemas:
         raise SchemaMissing('No "components/schemas" section defined')
 
-    if not post_route.get("requestBody"):
-        raise RequestBodyMissing
-    if not post_route["requestBody"].get("content"):
-        raise RequestBodyMissing
-    validate_component_schema(post_route["requestBody"], component_schemas)
+    if post_route.get("requestBody", {}).get("content"):
+        validate_component_schema(post_route["requestBody"], component_schemas)
 
     responses = post_route.get("responses", {})
     if not responses.get("200") or not responses["200"].get("content"):
         raise ResponseBodyMissing
     validate_component_schema(responses["200"], component_schemas)
+
+    headers = [
+        param.get("name", "").lower()
+        for param in post_route.get("parameters", [])
+        if param.get("in") == "header"
+    ]
+    if "authorization" not in headers:
+        raise AuthorizationHeaderMissing
+    if "x-authorization-provider" not in headers:
+        raise AuthProviderHeaderMissing
 
 
 class IhanStandardsValidator(BaseValidator):
