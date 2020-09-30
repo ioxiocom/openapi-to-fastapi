@@ -55,11 +55,7 @@ class SpecRouter:
         self._validators = [DefaultValidator] + (validators or [])  # type: ignore
         self._routes = RoutesMapping(post_map={}, get_map={})
 
-        if isinstance(specs_path, str):
-            self.specs_path = Path(specs_path)
-        else:
-            self.specs_path = specs_path
-
+        self.specs_path = Path(specs_path)
         self._validate_and_parse_specs()
 
     def _validate_and_parse_specs(self):

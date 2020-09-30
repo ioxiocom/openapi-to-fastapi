@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 from .core import BaseValidator, OpenApiValidationError
 
 
@@ -42,6 +45,18 @@ class AuthorizationHeaderMissing(IhanStandardError):
 
 
 class AuthProviderHeaderMissing(IhanStandardError):
+    pass
+
+
+class StandardComponentMissing(IhanStandardError):
+    pass
+
+
+class StandardContentMissing(IhanStandardError):
+    pass
+
+
+class JSONLDError(IhanStandardError):
     pass
 
 
@@ -109,7 +124,30 @@ def validate_spec(spec: dict):
         raise AuthProviderHeaderMissing
 
 
+def check_extra_files_exist(path: Path):
+    html = path.parent / path.name.replace(path.suffix, ".html")
+    if not html.exists():
+        raise StandardComponentMissing(f"Missing {html}")
+    if html.read_text().strip() == "":
+        raise StandardContentMissing(f"Make sure {html} is not empty")
+
+    jsonld = path.parent / path.name.replace(path.suffix, ".jsonld")
+    if not jsonld.exists():
+        raise StandardComponentMissing(f"Missing {jsonld}")
+    try:
+        content = json.loads(jsonld.read_text())
+    except json.JSONDecodeError:
+        raise JSONLDError(f"Failed to parse {jsonld}")
+    else:
+        if not content:
+            raise StandardContentMissing(f"Make sure {jsonld} is not empty")
+
+
 class IhanStandardsValidator(BaseValidator):
     def validate_spec(self, spec: dict):
         # just to reduce indentation
         return validate_spec(spec)
+
+    def validate(self):
+        super().validate()
+        check_extra_files_exist(self.path)
