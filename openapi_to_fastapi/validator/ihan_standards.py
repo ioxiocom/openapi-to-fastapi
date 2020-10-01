@@ -125,13 +125,13 @@ def validate_spec(spec: dict):
 
 
 def check_extra_files_exist(path: Path):
-    html = path.parent / path.name.replace(path.suffix, ".html")
+    html = path.with_suffix(".html")
     if not html.exists():
         raise StandardComponentMissing(f"Missing {html}")
     if html.read_text().strip() == "":
         raise StandardContentMissing(f"Make sure {html} is not empty")
 
-    jsonld = path.parent / path.name.replace(path.suffix, ".jsonld")
+    jsonld = path.with_suffix(".jsonld")
     if not jsonld.exists():
         raise StandardComponentMissing(f"Missing {jsonld}")
     try:

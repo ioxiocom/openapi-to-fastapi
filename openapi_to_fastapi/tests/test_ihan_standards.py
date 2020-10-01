@@ -145,6 +145,10 @@ def test_missing_html_file(tmp_path):
     with pytest.raises(ihan.StandardComponentMissing):
         SpecRouter(spec_path, [ihan.IhanStandardsValidator])
 
+    (tmp_path / "spec.html").write_text("    \n")
+    with pytest.raises(ihan.StandardContentMissing):
+        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
+
 
 def test_missing_jsonld_file(tmp_path):
     spec = deepcopy(COMPANY_BASIC_INFO)
