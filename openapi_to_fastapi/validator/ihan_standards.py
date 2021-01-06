@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+import pyld
+
 from .core import BaseValidator, OpenApiValidationError
 
 
@@ -60,6 +62,14 @@ class JSONLDError(IhanStandardError):
     pass
 
 
+class ServersShouldNotBeDefined(IhanStandardError):
+    pass
+
+
+class SecurityShouldNotBeDefined(IhanStandardError):
+    pass
+
+
 def validate_component_schema(spec: dict, components_schema: dict):
     if not spec["content"].get("application/json"):
         raise WrongContentType("Model description must be in application/json format")
@@ -86,6 +96,9 @@ def validate_spec(spec: dict):
     :param spec: OpenAPI spec
     :raises OpenApiValidationError: When OpenAPI spec is incorrect
     """
+    if "servers" in spec:
+        raise ServersShouldNotBeDefined('"servers" section found')
+
     paths = spec.get("paths", {})
     if not paths:
         raise NoEndpointsDefined
@@ -104,6 +117,9 @@ def validate_spec(spec: dict):
     component_schemas = spec.get("components", {}).get("schemas")
     if not component_schemas:
         raise SchemaMissing('No "components/schemas" section defined')
+
+    if "security" in post_route:
+        raise SecurityShouldNotBeDefined('"security" section found')
 
     if post_route.get("requestBody", {}).get("content"):
         validate_component_schema(post_route["requestBody"], component_schemas)
@@ -134,13 +150,23 @@ def check_extra_files_exist(path: Path):
     jsonld = path.with_suffix(".jsonld")
     if not jsonld.exists():
         raise StandardComponentMissing(f"Missing {jsonld}")
+
+
+def validate_json_ld(path: Path):
     try:
-        content = json.loads(jsonld.read_text())
+        json_ld = json.loads(path.read_text())
     except json.JSONDecodeError:
-        raise JSONLDError(f"Failed to parse {jsonld}")
+        raise JSONLDError(f"Failed to parse {path}")
     else:
-        if not content:
-            raise StandardContentMissing(f"Make sure {jsonld} is not empty")
+        if not json_ld:
+            raise StandardContentMissing(f"Make sure {path} is not empty")
+    try:
+        pyld.jsonld.compact({}, ctx=json_ld)
+    except pyld.jsonld.JsonLdError as err:
+        msg = f"Failed to parse JSON-LD at {path}"
+        if err.cause and err.cause.args:
+            msg += " " + "; ".join(err.cause.args)
+        raise JSONLDError(msg)
 
 
 class IhanStandardsValidator(BaseValidator):
@@ -151,3 +177,4 @@ class IhanStandardsValidator(BaseValidator):
     def validate(self):
         super().validate()
         check_extra_files_exist(self.path)
+        validate_json_ld(self.path.with_suffix(".jsonld"))
