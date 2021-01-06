@@ -1,0 +1,5 @@
+- id: openapi-to-fastapi
+  name: OpenAPI validator
+  entry: openapi-validator
+  language: python
+  language_version: python3
