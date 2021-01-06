@@ -1,4 +1,4 @@
-- id: openapi-to-fastapi
+- id: openapi-validator
   name: OpenAPI validator
   entry: openapi-validator
   language: python
