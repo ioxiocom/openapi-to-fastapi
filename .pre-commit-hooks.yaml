@@ -1,0 +1,6 @@
+- id: openapi-validator
+  name: OpenAPI validator
+  entry: openapi-validator
+  language: python
+  language_version: python3
+  pass_filenames: false
