@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from ..routes import SpecRouter
+from ..validator import InvalidJSON, UnsupportedVersion
 from ..validator import ihan_standards as ihan
 
 # Note: It's easier to get some 100% valid spec and corrupt it
@@ -13,6 +14,9 @@ from ..validator import ihan_standards as ihan
 SPECS_ROOT_DIR = Path(__file__).absolute().parent / "data"
 COMPANY_BASIC_INFO: dict = json.loads(
     (SPECS_ROOT_DIR / "ihan" / "CompanyBasicInfo.json").read_text()
+)
+COMPANY_BASIC_INFO_JSONLD: dict = json.loads(
+    (SPECS_ROOT_DIR / "ihan" / "CompanyBasicInfo.jsonld").read_text()
 )
 
 
@@ -145,4 +149,63 @@ def test_missing_html_file(tmp_path):
 
     (tmp_path / "spec.html").write_text("    \n")
     with pytest.raises(ihan.StandardContentMissing):
+        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
+
+
+def test_missing_jsonld_file(tmp_path):
+    spec = deepcopy(COMPANY_BASIC_INFO)
+    spec_path = tmp_path / "spec.json"
+    spec_path.write_text(json.dumps(spec))
+    (tmp_path / "spec.html").write_text("<html></html>")
+    with pytest.raises(ihan.StandardComponentMissing):
+        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
+
+    (tmp_path / "spec.jsonld").write_text("")
+    with pytest.raises(ihan.JSONLDError):
+        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
+
+    (tmp_path / "spec.jsonld").write_text("{}")
+    with pytest.raises(ihan.StandardContentMissing):
+        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
+
+
+def test_servers_are_defined(tmp_path):
+    spec = deepcopy(COMPANY_BASIC_INFO)
+    spec["servers"] = [{"url": "http://example.com"}]
+    check_validation_error(tmp_path, spec, ihan.ServersShouldNotBeDefined)
+
+
+def test_security_is_defined(tmp_path):
+    spec = deepcopy(COMPANY_BASIC_INFO)
+    spec["paths"]["/Company/BasicInfo"]["post"]["security"] = {}
+    check_validation_error(tmp_path, spec, ihan.SecurityShouldNotBeDefined)
+
+
+def test_loading_non_json_file(tmp_path):
+    spec_path = tmp_path / "spec.json"
+    spec_path.write_text("weirdo content")
+    with pytest.raises(InvalidJSON):
+        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
+
+
+def test_loading_unsupported_version(tmp_path):
+    spec = deepcopy(COMPANY_BASIC_INFO)
+    spec["openapi"] = "999.999.999"
+    check_validation_error(tmp_path, spec, UnsupportedVersion)
+
+
+def test_jsonld_with_wrong_content(tmp_path):
+    spec = deepcopy(COMPANY_BASIC_INFO)
+    spec_path = tmp_path / "spec.json"
+    spec_path.write_text(json.dumps(spec))
+    (tmp_path / "spec.html").write_text("<html></html>")
+
+    json_ld = {"@context": {"broken": "one"}}
+    (tmp_path / "spec.jsonld").write_text(json.dumps(json_ld))
+    with pytest.raises(ihan.JSONLDError):
+        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
+
+    json_ld = {"@context": {"@version": "999.999"}}
+    (tmp_path / "spec.jsonld").write_text(json.dumps(json_ld))
+    with pytest.raises(ihan.JSONLDError):
         SpecRouter(spec_path, [ihan.IhanStandardsValidator])

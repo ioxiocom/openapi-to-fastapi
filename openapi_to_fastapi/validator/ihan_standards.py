@@ -55,6 +55,14 @@ class StandardContentMissing(IhanStandardError):
     pass
 
 
+class ServersShouldNotBeDefined(IhanStandardError):
+    pass
+
+
+class SecurityShouldNotBeDefined(IhanStandardError):
+    pass
+
+
 def validate_component_schema(spec: dict, components_schema: dict):
     if not spec["content"].get("application/json"):
         raise WrongContentType("Model description must be in application/json format")
@@ -81,6 +89,9 @@ def validate_spec(spec: dict):
     :param spec: OpenAPI spec
     :raises OpenApiValidationError: When OpenAPI spec is incorrect
     """
+    if "servers" in spec:
+        raise ServersShouldNotBeDefined('"servers" section found')
+
     paths = spec.get("paths", {})
     if not paths:
         raise NoEndpointsDefined
@@ -99,6 +110,9 @@ def validate_spec(spec: dict):
     component_schemas = spec.get("components", {}).get("schemas")
     if not component_schemas:
         raise SchemaMissing('No "components/schemas" section defined')
+
+    if "security" in post_route:
+        raise SecurityShouldNotBeDefined('"security" section found')
 
     if post_route.get("requestBody", {}).get("content"):
         validate_component_schema(post_route["requestBody"], component_schemas)
