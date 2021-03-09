@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 
 from .core import BaseValidator, OpenApiValidationError
@@ -53,10 +52,6 @@ class StandardComponentMissing(IhanStandardError):
 
 
 class StandardContentMissing(IhanStandardError):
-    pass
-
-
-class JSONLDError(IhanStandardError):
     pass
 
 
@@ -130,17 +125,6 @@ def check_extra_files_exist(path: Path):
         raise StandardComponentMissing(f"Missing {html}")
     if html.read_text().strip() == "":
         raise StandardContentMissing(f"Make sure {html} is not empty")
-
-    jsonld = path.with_suffix(".jsonld")
-    if not jsonld.exists():
-        raise StandardComponentMissing(f"Missing {jsonld}")
-    try:
-        content = json.loads(jsonld.read_text())
-    except json.JSONDecodeError:
-        raise JSONLDError(f"Failed to parse {jsonld}")
-    else:
-        if not content:
-            raise StandardContentMissing(f"Make sure {jsonld} is not empty")
 
 
 class IhanStandardsValidator(BaseValidator):

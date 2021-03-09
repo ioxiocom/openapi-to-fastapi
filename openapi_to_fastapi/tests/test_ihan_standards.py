@@ -55,7 +55,6 @@ def test_missing_field_body_is_fine(tmp_path):
     del spec["paths"]["/Company/BasicInfo"]["post"]["requestBody"]
     spec_path = tmp_path / "spec.json"
     (tmp_path / "spec.html").write_text("<html></html>")
-    (tmp_path / "spec.jsonld").write_text('{"a":"b"}')
     spec_path.write_text(json.dumps(spec))
     SpecRouter(spec_path, [ihan.IhanStandardsValidator])
 
@@ -141,27 +140,9 @@ def test_missing_html_file(tmp_path):
     spec = deepcopy(COMPANY_BASIC_INFO)
     spec_path = tmp_path / "spec.json"
     spec_path.write_text(json.dumps(spec))
-    (tmp_path / "spec.jsonld").write_text('{"a":"b"}')
     with pytest.raises(ihan.StandardComponentMissing):
         SpecRouter(spec_path, [ihan.IhanStandardsValidator])
 
     (tmp_path / "spec.html").write_text("    \n")
-    with pytest.raises(ihan.StandardContentMissing):
-        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
-
-
-def test_missing_jsonld_file(tmp_path):
-    spec = deepcopy(COMPANY_BASIC_INFO)
-    spec_path = tmp_path / "spec.json"
-    spec_path.write_text(json.dumps(spec))
-    (tmp_path / "spec.html").write_text("<html></html>")
-    with pytest.raises(ihan.StandardComponentMissing):
-        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
-
-    (tmp_path / "spec.jsonld").write_text("")
-    with pytest.raises(ihan.JSONLDError):
-        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
-
-    (tmp_path / "spec.jsonld").write_text("{}")
     with pytest.raises(ihan.StandardContentMissing):
         SpecRouter(spec_path, [ihan.IhanStandardsValidator])
