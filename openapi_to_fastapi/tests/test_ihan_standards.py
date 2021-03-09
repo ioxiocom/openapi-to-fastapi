@@ -15,9 +15,6 @@ SPECS_ROOT_DIR = Path(__file__).absolute().parent / "data"
 COMPANY_BASIC_INFO: dict = json.loads(
     (SPECS_ROOT_DIR / "ihan" / "CompanyBasicInfo.json").read_text()
 )
-COMPANY_BASIC_INFO_JSONLD: dict = json.loads(
-    (SPECS_ROOT_DIR / "ihan" / "CompanyBasicInfo.jsonld").read_text()
-)
 
 
 def check_validation_error(tmp_path, spec: dict, exception):
@@ -152,23 +149,6 @@ def test_missing_html_file(tmp_path):
         SpecRouter(spec_path, [ihan.IhanStandardsValidator])
 
 
-def test_missing_jsonld_file(tmp_path):
-    spec = deepcopy(COMPANY_BASIC_INFO)
-    spec_path = tmp_path / "spec.json"
-    spec_path.write_text(json.dumps(spec))
-    (tmp_path / "spec.html").write_text("<html></html>")
-    with pytest.raises(ihan.StandardComponentMissing):
-        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
-
-    (tmp_path / "spec.jsonld").write_text("")
-    with pytest.raises(ihan.JSONLDError):
-        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
-
-    (tmp_path / "spec.jsonld").write_text("{}")
-    with pytest.raises(ihan.StandardContentMissing):
-        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
-
-
 def test_servers_are_defined(tmp_path):
     spec = deepcopy(COMPANY_BASIC_INFO)
     spec["servers"] = [{"url": "http://example.com"}]
@@ -192,20 +172,3 @@ def test_loading_unsupported_version(tmp_path):
     spec = deepcopy(COMPANY_BASIC_INFO)
     spec["openapi"] = "999.999.999"
     check_validation_error(tmp_path, spec, UnsupportedVersion)
-
-
-def test_jsonld_with_wrong_content(tmp_path):
-    spec = deepcopy(COMPANY_BASIC_INFO)
-    spec_path = tmp_path / "spec.json"
-    spec_path.write_text(json.dumps(spec))
-    (tmp_path / "spec.html").write_text("<html></html>")
-
-    json_ld = {"@context": {"broken": "one"}}
-    (tmp_path / "spec.jsonld").write_text(json.dumps(json_ld))
-    with pytest.raises(ihan.JSONLDError):
-        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
-
-    json_ld = {"@context": {"@version": "999.999"}}
-    (tmp_path / "spec.jsonld").write_text(json.dumps(json_ld))
-    with pytest.raises(ihan.JSONLDError):
-        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
