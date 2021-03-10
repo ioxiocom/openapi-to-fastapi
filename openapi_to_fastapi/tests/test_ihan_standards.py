@@ -55,7 +55,6 @@ def test_missing_field_body_is_fine(tmp_path):
     spec = deepcopy(COMPANY_BASIC_INFO)
     del spec["paths"]["/Company/BasicInfo"]["post"]["requestBody"]
     spec_path = tmp_path / "spec.json"
-    (tmp_path / "spec.html").write_text("<html></html>")
     spec_path.write_text(json.dumps(spec))
     SpecRouter(spec_path, [ihan.IhanStandardsValidator])
 
@@ -135,18 +134,6 @@ def test_auth_provider_header_is_missing(tmp_path):
     }
     spec["paths"]["/Company/BasicInfo"]["post"]["parameters"] = [auth_header]
     check_validation_error(tmp_path, spec, ihan.AuthProviderHeaderMissing)
-
-
-def test_missing_html_file(tmp_path):
-    spec = deepcopy(COMPANY_BASIC_INFO)
-    spec_path = tmp_path / "spec.json"
-    spec_path.write_text(json.dumps(spec))
-    with pytest.raises(ihan.StandardComponentMissing):
-        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
-
-    (tmp_path / "spec.html").write_text("    \n")
-    with pytest.raises(ihan.StandardContentMissing):
-        SpecRouter(spec_path, [ihan.IhanStandardsValidator])
 
 
 def test_servers_are_defined(tmp_path):
