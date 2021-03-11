@@ -171,6 +171,7 @@ class SpecRouter:
             router.post(
                 path,
                 name=route_name,
+                summary=route_name,
                 description=route_info.description,
                 response_description=route_info.response_description,
                 response_model=resp_model,
