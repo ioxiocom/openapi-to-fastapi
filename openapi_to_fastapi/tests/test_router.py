@@ -162,6 +162,7 @@ def test_routes_meta_info_custom_name(app, client, specs_root):
     route = [r for r in router.routes if r.path == "/Company/BasicInfo"][0]
 
     assert route.name == "Company/BasicInfo"
+    assert route.summary == "Company/BasicInfo"
     # description by default is coming from spec
     assert route.description == "Information about the company"
 
