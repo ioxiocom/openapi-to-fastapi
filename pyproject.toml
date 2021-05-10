@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openapi-to-fastapi"
-version = "0.1.4"
+version = "0.1.5"
 description = "Create FastAPI routes from OpenAPI spec"
 authors = ["Digital Living International Ltd"]
 license = "BSD-3-Clause"
@@ -16,7 +16,7 @@ openapi-validator = "openapi_to_fastapi.cli:cli_validate_specs"
 [tool.poetry.dependencies]
 python = ">=3.6.1"
 datamodel-code-generator = "^0.5.24"
-fastapi = { version = "^0.47.1" }
+fastapi = { version = ">=0.47.1, < 0.58" }
 genson = "1.2.1"
 click = "^7.1.2"
 coloredlogs = "^14.0"
