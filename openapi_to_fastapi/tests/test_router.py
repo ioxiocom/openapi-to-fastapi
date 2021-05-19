@@ -184,6 +184,7 @@ def test_custom_route_name_for_default_post(app, client, specs_root):
     router = spec_router.to_fastapi_router()
     route = [r for r in router.routes if r.path == "/Company/BasicInfo"][0]
     assert route.name == "Company/BasicInfo"
+    assert route.description == "Information about the company"
 
     # test that generating OpenAPI still works
     app.include_router(router)

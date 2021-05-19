@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 import pydantic
 from fastapi import APIRouter
@@ -35,7 +35,14 @@ class RouteInfo:
 
     request_model: Optional[Type[pydantic.BaseModel]] = None
     response_model: Optional[Type[pydantic.BaseModel]] = None
+    responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None
     handler: Callable = dummy_route
+
+    def merge_with(self, another_route: "RouteInfo"):
+        for v in vars(self).keys():
+            another_value = getattr(another_route, v)
+            if another_value is not None:
+                setattr(self, v, another_value)
 
 
 @dataclass
@@ -111,6 +118,7 @@ class SpecRouter:
         description: str = None,
         response_description: str = None,
         name_factory: Optional[Callable] = None,
+        responses: Dict[Union[int, str], Dict[str, Any]] = None,
     ):
         """
         Define implementation for a specific POST route
@@ -123,6 +131,7 @@ class SpecRouter:
         :param tags: Specific tags for docs
         :param description: Route description. Got from OpenAPI spec by default
         :param response_description: Description of the response
+        :param responses: Possible responses the route may return. Used in documentation
         """
 
         def _wrapper(fn):
@@ -136,6 +145,8 @@ class SpecRouter:
             route_info.name = name
             route_info.tags = tags
             route_info.name_factory = name_factory
+            route_info.responses = responses
+
             if response_description:
                 route_info.response_description = response_description
             if description:
@@ -159,7 +170,7 @@ class SpecRouter:
 
             # if route is not customized, fall back to default POST
             if route_info.handler == dummy_route:
-                route_info = self._routes.default_post
+                route_info.merge_with(self._routes.default_post)
 
             route_name = route_info.name
             if route_info.name_factory:
@@ -175,6 +186,7 @@ class SpecRouter:
                 description=route_info.description,
                 response_description=route_info.response_description,
                 response_model=resp_model,
+                responses=route_info.responses,
                 tags=route_info.tags,
             )(handler)
         return router
