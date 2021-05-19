@@ -3,6 +3,9 @@ name: Test the library
 on:
   pull_request:
     types: [opened, synchronize, edited]
+  push:
+    branches:
+      - feature/pass-responses
 
 jobs:
   Test:
