@@ -9,12 +9,12 @@ snapshots = Snapshot()
 snapshots["test_weather_route_payload_errors Missing payload"] = {
     "detail": [
         {
-            "loc": ["body", "lat"],
+            "loc": ["body", "request", "lat"],
             "msg": "field required",
             "type": "value_error.missing",
         },
         {
-            "loc": ["body", "lon"],
+            "loc": ["body", "request", "lon"],
             "msg": "field required",
             "type": "value_error.missing",
         },
@@ -24,13 +24,13 @@ snapshots["test_weather_route_payload_errors Missing payload"] = {
 snapshots["test_weather_route_payload_errors Incorrect payload type"] = {
     "detail": [
         {
-            "loc": ["body", "lat"],
+            "loc": ["body", "request", "lat"],
             "msg": "value is not a valid float",
             "type": "type_error.float",
         },
         {
             "ctx": {"limit_value": 180.0},
-            "loc": ["body", "lon"],
+            "loc": ["body", "request", "lon"],
             "msg": "ensure this value is less than or equal to 180.0",
             "type": "value_error.number.not_le",
         },
