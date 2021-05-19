@@ -25,7 +25,7 @@ jobs:
         run: poetry install
 
       - name: Run pre-commit
-        run: pre-commit run --all-files || exit 1
+        run: pre-commit run --all-files
 
       - name: Run tests
         run: poetry run invoke test
