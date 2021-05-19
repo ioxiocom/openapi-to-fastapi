@@ -1,0 +1,28 @@
+name: Test the library
+
+on:
+  pull_request:
+    types: [opened, synchronize, edited]
+
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+
+      - name: Install Poetry and pre-commit
+        run: pip install poetry pre-commit
+
+      - name: Install poetry dependencies
+        run: poetry install
+
+      - name: Run pre-commit
+        run: pre-commit run --all-files || exit 1
+
+      - name: Run tests
+        run: poetry run invoke test
