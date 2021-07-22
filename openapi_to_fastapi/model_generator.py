@@ -46,7 +46,7 @@ def generate_model_from_schema(schema: str) -> str:
 
 
 @contextmanager
-def _clean_tempfile(tmp_file: _TemporaryFileWrapper, delete=True):
+def _clean_tempfile(tmp_file, delete=True):
     try:
         yield tmp_file
     finally:
