@@ -67,9 +67,12 @@ def load_models(schema: str, name: str = "", cleanup: bool = True):
     :return: Module with pydantic models
     """
     prefix = name.replace("/", "").replace(" ", "").replace("\\", "") + "_"
-    with _clean_tempfile(tempfile.NamedTemporaryFile(
-        prefix=prefix, mode="w", suffix=".py", encoding="utf8", delete=False
-    ), delete=cleanup) as tmp_file:
+    with _clean_tempfile(
+        tempfile.NamedTemporaryFile(
+            prefix=prefix, mode="w", suffix=".py", encoding="utf8", delete=False
+        ),
+        delete=cleanup,
+    ) as tmp_file:
         model_py = generate_model_from_schema(schema)
         tmp_file.write(model_py)
         if not cleanup:
