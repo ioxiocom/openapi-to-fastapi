@@ -4,7 +4,11 @@ from pathlib import Path
 from typing import Union
 
 
-class OpenApiValidationError(Exception):
+class ValidationError(Exception):
+    pass
+
+
+class OpenApiValidationError(ValidationError):
     pass
 
 

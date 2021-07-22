@@ -9,7 +9,7 @@ from fastapi import APIRouter
 from .model_generator import load_models
 from .parser import parse_openapi_spec
 from .utils import add_annotation_to_first_argument, copy_function
-from .validator.core import BaseValidator, DefaultValidator
+from .validator.core import BaseValidator, DefaultValidator, ValidationError
 
 
 def dummy_route(request):
@@ -75,8 +75,11 @@ class SpecRouter:
             specs = self.specs_path.glob("**/*.json")
 
         for spec_path in specs:
-            for validator in self._validators:
-                validator(spec_path).validate()
+            try:
+                for validator in self._validators:
+                    validator(spec_path).validate()
+            except Exception as e:
+                raise ValidationError(f"Failed to validate {spec_path}: {e}")
 
             raw_spec = spec_path.read_text()
             json_spec = json.loads(raw_spec)
