@@ -1,7 +1,7 @@
 import importlib.util
 import tempfile
 import uuid
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from pathlib import Path
 from tempfile import _TemporaryFileWrapper
 
@@ -52,7 +52,8 @@ def _clean_tempfile(tmp_file: _TemporaryFileWrapper, delete=True):
     finally:
         if delete:
             tmp_file.close()
-            Path(tmp_file.name).unlink(missing_ok=True)
+            with suppress(FileNotFoundError):
+                Path(tmp_file.name).unlink()
 
 
 def load_models(schema: str, name: str = "", cleanup: bool = True):
