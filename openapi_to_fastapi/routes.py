@@ -75,11 +75,8 @@ class SpecRouter:
             specs = self.specs_path.glob("**/*.json")
 
         for spec_path in specs:
-            try:
-                for validator in self._validators:
-                    validator(spec_path).validate()
-            except Exception as e:
-                raise ValidationError(f"Failed to validate {spec_path}: {e}")
+            for validator in self._validators:
+                validator(spec_path).validate()
 
             raw_spec = spec_path.read_text()
             json_spec = json.loads(raw_spec)
