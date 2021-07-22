@@ -13,7 +13,7 @@ from ..validator import ihan_standards as ihan
 
 SPECS_ROOT_DIR = Path(__file__).absolute().parent / "data"
 COMPANY_BASIC_INFO: dict = json.loads(
-    (SPECS_ROOT_DIR / "ihan" / "CompanyBasicInfo.json").read_text()
+    (SPECS_ROOT_DIR / "ihan" / "CompanyBasicInfo.json").read_text(encoding="utf8")
 )
 
 

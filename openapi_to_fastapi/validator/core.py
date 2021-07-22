@@ -30,7 +30,7 @@ class BaseValidator:
 
     def validate(self):
         try:
-            spec = json.loads(self.path.read_text())
+            spec = json.loads(self.path.read_text(encoding="utf8"))
         except json.JSONDecodeError:
             raise InvalidJSON(f"Incorrect JSON: {self.path}")
         except Exception as e:

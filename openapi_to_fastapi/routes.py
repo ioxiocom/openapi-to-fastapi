@@ -78,7 +78,7 @@ class SpecRouter:
             for validator in self._validators:
                 validator(spec_path).validate()
 
-            raw_spec = spec_path.read_text()
+            raw_spec = spec_path.read_text(encoding="utf8")
             json_spec = json.loads(raw_spec)
             for path, path_item in parse_openapi_spec(json_spec).items():
                 models = load_models(raw_spec, path)
