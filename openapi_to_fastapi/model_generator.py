@@ -69,7 +69,7 @@ def load_models(schema: str, name: str = "", cleanup: bool = True):
     """
     prefix = name.replace("/", "").replace(" ", "").replace("\\", "") + "_"
     with _clean_tempfile(tempfile.NamedTemporaryFile(
-        prefix=prefix, mode="w", suffix=".py", delete=False
+        prefix=prefix, mode="w", suffix=".py", encoding="utf8", delete=False
     ), delete=cleanup) as tmp_file:
         model_py = generate_model_from_schema(schema)
         tmp_file.write(model_py)
