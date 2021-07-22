@@ -3,7 +3,6 @@ import tempfile
 import uuid
 from contextlib import contextmanager, suppress
 from pathlib import Path
-from tempfile import _TemporaryFileWrapper
 
 from datamodel_code_generator import (
     BaseModel,
