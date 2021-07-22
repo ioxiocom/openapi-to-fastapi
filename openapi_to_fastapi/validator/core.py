@@ -4,7 +4,11 @@ from pathlib import Path
 from typing import Union
 
 
-class OpenApiValidationError(Exception):
+class ValidationError(Exception):
+    pass
+
+
+class OpenApiValidationError(ValidationError):
     pass
 
 
@@ -29,6 +33,8 @@ class BaseValidator:
             spec = json.loads(self.path.read_text())
         except json.JSONDecodeError:
             raise InvalidJSON(f"Incorrect JSON: {self.path}")
+        except Exception as e:
+            raise ValidationError(f"Failed to validate {self.path}: {e}")
         self.validate_spec(spec)
 
     @abc.abstractmethod
