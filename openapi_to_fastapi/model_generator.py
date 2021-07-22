@@ -1,6 +1,10 @@
 import importlib.util
 import tempfile
 import uuid
+from contextlib import contextmanager
+from pathlib import Path
+from tempfile import _TemporaryFileWrapper
+from typing import IO
 
 from datamodel_code_generator import (
     BaseModel,
@@ -42,6 +46,16 @@ def generate_model_from_schema(schema: str) -> str:
     return str(result)
 
 
+@contextmanager
+def _clean_tempfile(tmp_file: _TemporaryFileWrapper, delete=True):
+    try:
+        yield tmp_file
+    finally:
+        if delete:
+            tmp_file.close()
+            Path(tmp_file.name).unlink(missing_ok=True)
+
+
 def load_models(schema: str, name: str = "", cleanup: bool = True):
     """
     Generate pydantic models from OpenAPI spec and return a python module,
@@ -54,9 +68,9 @@ def load_models(schema: str, name: str = "", cleanup: bool = True):
     :return: Module with pydantic models
     """
     prefix = name.replace("/", "").replace(" ", "").replace("\\", "") + "_"
-    with tempfile.NamedTemporaryFile(
-        prefix=prefix, mode="w", suffix=".py", delete=cleanup
-    ) as tmp_file:
+    with _clean_tempfile(tempfile.NamedTemporaryFile(
+        prefix=prefix, mode="w", suffix=".py", delete=False
+    ), delete=cleanup) as tmp_file:
         model_py = generate_model_from_schema(schema)
         tmp_file.write(model_py)
         if not cleanup:
