@@ -4,7 +4,6 @@ import uuid
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import _TemporaryFileWrapper
-from typing import IO
 
 from datamodel_code_generator import (
     BaseModel,
