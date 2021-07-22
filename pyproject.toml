@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openapi-to-fastapi"
-version = "0.1.6"
+version = "0.1.7"
 description = "Create FastAPI routes from OpenAPI spec"
 authors = ["Digital Living International Ltd"]
 license = "BSD-3-Clause"
