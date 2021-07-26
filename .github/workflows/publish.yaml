@@ -2,8 +2,8 @@ name: Build and upload to PyPI
 
 on:
   push:
-    branches:
-      - gh-actions
+    tags:
+      - "*"
 
 jobs:
   build_and_upload:
@@ -23,12 +23,16 @@ jobs:
       - name: Install dependencies 🛠
         run: poetry install
 
+      - name: Run pre-commit 🤔
+        run: pre-commit run --all-files
+
+      - name: Run tests 🌈
+        run: poetry run invoke test
+
       - name: Publish package to PyPI 🙌
         run: |
           set -e
-          poetry config repositories.testpypi https://test.pypi.org/legacy/
           poetry config http-basic.pypi "__token__" "${PYPI_TOKEN}"
-          poetry config http-basic.testpypi "__token__" "${PYPI_TOKEN}"
-          poetry publish --build -r testpypi
+          poetry publish --build
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
