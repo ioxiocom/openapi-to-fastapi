@@ -1,0 +1,38 @@
+name: Build and upload to PyPI
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build_and_upload:
+    name: Build and upload
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 🐍
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+
+      - name: Install Poetry and pre-commit 💈
+        run: pip install poetry pre-commit
+
+      - name: Install dependencies 🛠
+        run: poetry install
+
+      - name: Run pre-commit 🤔
+        run: pre-commit run --all-files
+
+      - name: Run tests 🌈
+        run: poetry run invoke test
+
+      - name: Publish package to PyPI 🙌
+        run: |
+          set -e
+          poetry config http-basic.pypi "__token__" "${PYPI_TOKEN}"
+          poetry publish --build
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
