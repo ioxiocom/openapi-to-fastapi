@@ -17,8 +17,8 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install Poetry 💈
-        run: pip install poetry
+      - name: Install Poetry and pre-commit 💈
+        run: pip install poetry pre-commit
 
       - name: Install dependencies 🛠
         run: poetry install
