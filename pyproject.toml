@@ -20,7 +20,6 @@ fastapi = "^0.68.1"
 genson = "1.2.1"
 click = "^7.1.2"
 coloredlogs = "^14.0"
-pre-commit = "^2.14.1"
 
 [tool.poetry.dev-dependencies]
 isort = ">=4.3.21"
