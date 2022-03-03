@@ -4,12 +4,8 @@ import uuid
 from contextlib import contextmanager, suppress
 from pathlib import Path
 
-from datamodel_code_generator import (
-    BaseModel,
-    CustomRootType,
-    DataModelField,
-    PythonVersion,
-)
+from datamodel_code_generator import PythonVersion
+from datamodel_code_generator.model import pydantic as pydantic_model
 from datamodel_code_generator.parser.openapi import OpenAPIParser
 
 from openapi_to_fastapi.logger import logger
@@ -24,14 +20,15 @@ def generate_model_from_schema(schema: str) -> str:
     :return: Importable python code with generated models
     """
     parser = OpenAPIParser(
-        BaseModel,
-        CustomRootType,
-        DataModelField,
+        source=schema,
+        data_model_type=pydantic_model.BaseModel,
+        data_model_root_type=pydantic_model.CustomRootType,
+        data_type_manager_type=pydantic_model.DataTypeManager,
+        data_model_field_type=pydantic_model.DataModelField,
         base_class="pydantic.BaseModel",
         custom_template_dir=None,
         extra_template_data=None,
         target_python_version=PythonVersion.PY_37,
-        text=schema,
         dump_resolve_reference_action=None,
         validation=True,
         field_constraints=False,
@@ -80,7 +77,7 @@ def load_models(schema: str, name: str = "", cleanup: bool = True):
         tmp_file.flush()
         module_name = f"oas_models_{uuid.uuid4()}"
         spec = importlib.util.spec_from_file_location(module_name, tmp_file.name)
-        if spec.loader:
+        if spec and spec.loader:
             return spec.loader.load_module(module_name)
         else:
             raise ValueError(f"Failed to load module {module_name}")
