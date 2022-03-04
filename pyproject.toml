@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openapi-to-fastapi"
-version = "0.2.0"
+version = "0.3.0"
 description = "Create FastAPI routes from OpenAPI spec"
 authors = ["Digital Living International Ltd"]
 license = "BSD-3-Clause"
@@ -14,8 +14,8 @@ packages = [
 openapi-validator = "openapi_to_fastapi.cli:cli_validate_specs"
 
 [tool.poetry.dependencies]
-python = ">=3.6.1"
-datamodel-code-generator = "^0.5.24"
+python = ">=3.6.1,<4.0.0"
+datamodel-code-generator = "^0.11.19"
 fastapi = "^0.68.1"
 genson = "1.2.1"
 click = "^7.1.2"
@@ -27,7 +27,7 @@ pytest = "^6.0.1"
 pytest-asyncio = "^0.10.0"
 snapshottest = "^0.5.1"
 flake8 = "^3.8.3"
-mypy = "^0.782"
+mypy = "^0.931"
 invoke = "^1.4.1"
 
 [build-system]

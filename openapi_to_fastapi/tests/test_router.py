@@ -1,5 +1,3 @@
-import json
-
 import pydantic
 import pytest
 from fastapi import Header
@@ -26,8 +24,8 @@ def test_routes_are_created(ihan_client, specs_root):
 
 def test_pydantic_model_loading(specs_root):
     path = specs_root / "ihan" / "CompanyBasicInfo.json"
-    spec = json.loads(path.read_text(encoding="utf8"))
-    module = load_models(spec, "/Company/BasicInfo")
+    raw_spec = path.read_text(encoding="utf8")
+    module = load_models(raw_spec, "/Company/BasicInfo")
     assert module.BasicCompanyInfoRequest
     assert module.BasicCompanyInfoResponse
     assert module.HTTPValidationError

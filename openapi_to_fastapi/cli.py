@@ -79,7 +79,7 @@ def _load_extra_validator_modules(modules: List[str]) -> list:
     for module_path in modules:
         module_name = f"oas_models_{uuid.uuid4()}"
         spec = importlib.util.spec_from_file_location(module_name, module_path)
-        if spec.loader:
+        if spec and spec.loader:
             validator_modules.append(spec.loader.load_module(module_name))
     return validator_modules
 
