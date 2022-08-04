@@ -5,7 +5,7 @@ description = "Create FastAPI routes from OpenAPI spec"
 authors = ["Digital Living International Ltd"]
 license = "BSD-3-Clause"
 readme = "README.md"
-repository = "https://github.com/digitalliving/openapi-to-fastapi"
+repository = "https://github.com/ioxiocom/openapi-to-fastapi"
 packages = [
     {include="openapi_to_fastapi", from="."}
 ]
