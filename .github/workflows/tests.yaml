@@ -5,27 +5,29 @@ on:
     types: [opened, synchronize, edited]
 
 jobs:
-  RunTests:
+  run_tests:
+    name: Run tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout 🔁
+        uses: actions/checkout@v3
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+      - name: Set up Python ${{ matrix.python-version }} 🐍
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry and pre-commit
+      - name: Install Poetry and pre-commit 💈
         run: pip install poetry pre-commit
 
-      - name: Install poetry dependencies
+      - name: Install dependencies 🛠
         run: poetry install
 
-      - name: Run pre-commit
+      - name: Run pre-commit 🤔
         run: pre-commit run --all-files
 
-      - name: Run tests
+      - name: Run tests 🌈
         run: poetry run invoke test
