@@ -1,17 +1,17 @@
 ## Reasoning
 
-[FastAPI](https://github.com/tiangolo/fastapi) is an awesome framework that
-simplifies the process of creating APIs. One of the most exciting features is
-that it can generate OpenAPI specs out of the box. But what if.. you have an
-OpenAPI spec and you need to create an API from it?
+[FastAPI](https://github.com/tiangolo/fastapi) is an awesome framework that simplifies
+the process of creating APIs. One of the most exciting features is that it can generate
+OpenAPI specs out of the box. But what if.. you have an OpenAPI spec and you need to
+create an API from it?
 
-One day we faced that problem — we had to create an API from multiple OpenAPI
-specs, and make sure that the incoming requests and the outgoing responses were
-aligned with the models defined the specs.
+One day we faced that problem — we had to create an API from multiple OpenAPI specs, and
+make sure that the incoming requests and the outgoing responses were aligned with the
+models defined the specs.
 
-> ⚠️ This library was created to cover only our own needs first. So for now it's
-> not suitable for everyone and has a lot of technical restrictions. Please
-> consider it as experimental stuff
+> ⚠️ This library was created to cover only our own needs first. So for now it's not
+> suitable for everyone and has a lot of technical restrictions. Please consider it as
+> experimental stuff
 
 ## Installation
 
@@ -23,8 +23,8 @@ pip install openapi-to-fastapi
 
 ## Generating FastAPI routes
 
-The main purpose of this library is to generate FastAPI routes from OpenAPI
-specs. This is done by:
+The main purpose of this library is to generate FastAPI routes from OpenAPI specs. This
+is done by:
 
 ```python
 from pathlib import Path
@@ -35,8 +35,8 @@ specs = Path("./specs")
 router = SpecRouter(specs).to_fastapi_router()
 ```
 
-The code above will create a FastAPI router that can be either included into the
-main router, or used as the default one.
+The code above will create a FastAPI router that can be either included into the main
+router, or used as the default one.
 
 Imagine you have a following spec (some parts are cut off for brevity):
 
@@ -158,12 +158,11 @@ router = spec_router.to_fastapi_router()
 
 ### API Documentation
 
-Now after you have a lot of routes, you might want to leverage another great
-feature of FastAPI — auto documentation.
+Now after you have a lot of routes, you might want to leverage another great feature of
+FastAPI — auto documentation.
 
-Request and response models are already handled. But to display documentation
-nicely, FastAPI needs to assign a name for each endpoint. Here is how you can
-provide such name:
+Request and response models are already handled. But to display documentation nicely,
+FastAPI needs to assign a name for each endpoint. Here is how you can provide such name:
 
 ```python
 from openapi_to_fastapi.routes import SpecRouter
@@ -192,12 +191,12 @@ def create_pet(params):
 
 ## OpenAPI validation
 
-This package also provides a CLI entrypoint to validate OpenAPI specs. It's
-especially useful when you need to define you own set of rules for validation.
+This package also provides a CLI entrypoint to validate OpenAPI specs. It's especially
+useful when you need to define you own set of rules for validation.
 
-Imagine your API specs are stored in a separate repository and maintained by
-another team. You also expect that all OpenAPI specs have only one endpoint
-defined (some internal agreement).
+Imagine your API specs are stored in a separate repository and maintained by another
+team. You also expect that all OpenAPI specs have only one endpoint defined (some
+internal agreement).
 
 Now you can set up a CI check and validate them on every push.
 
