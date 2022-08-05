@@ -10,12 +10,13 @@ jobs:
     name: Build and upload
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout 🔁
+        uses: actions/checkout@v3
 
       - name: Set up Python 🐍
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: "3.9"
 
       - name: Install Poetry and pre-commit 💈
         run: pip install poetry pre-commit

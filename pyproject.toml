@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "openapi-to-fastapi"
-version = "0.4.0"
+version = "0.4.1"
 description = "Create FastAPI routes from OpenAPI spec"
 authors = ["Digital Living International Ltd"]
 license = "BSD-3-Clause"
 readme = "README.md"
-repository = "https://github.com/digitalliving/openapi-to-fastapi"
+repository = "https://github.com/ioxiocom/openapi-to-fastapi"
 packages = [
     {include="openapi_to_fastapi", from="."}
 ]
@@ -31,5 +31,5 @@ mypy = "^0.942"
 invoke = "^1.7.0"
 
 [build-system]
-requires = ["poetry>=1.0.0"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
