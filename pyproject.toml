@@ -21,6 +21,10 @@ genson = "^1.2.2"
 click = "^8.1.2"
 coloredlogs = "^15.0.1"
 
+[tool.skjold]
+report_only = false
+sources = ["pyup", "gemnasium"]
+
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"
 pytest = "^7.1.1"
