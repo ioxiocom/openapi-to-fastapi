@@ -38,3 +38,7 @@ repos:
     rev: 4.0.1
     hooks:
       - id: flake8
+  - repo: https://github.com/twu/skjold
+    rev: v0.5.0
+    hooks:
+      - id: skjold
