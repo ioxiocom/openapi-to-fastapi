@@ -150,8 +150,8 @@ def hello_world(params, x_my_token: str = Header(...)):
 # Specific endpoint for a "/pet" route
 @spec_router.post("/pet")
 def create_pet(params):
-        pet = db.make_pet(name=params.name)
-        return pet.to_dict()
+    pet = db.make_pet(name=params.name)
+    return pet.to_dict()
 
 router = spec_router.to_fastapi_router()
 ```
