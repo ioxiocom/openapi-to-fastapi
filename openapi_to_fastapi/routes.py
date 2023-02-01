@@ -32,6 +32,7 @@ class RouteInfo:
     name_factory: Optional[Callable] = None
     response_description: str = "Successful response"
     tags: Optional[List[str]] = None
+    summary: Optional[str] = None
 
     request_model: Optional[Type[pydantic.BaseModel]] = None
     response_model: Optional[Type[pydantic.BaseModel]] = None
@@ -86,7 +87,9 @@ class SpecRouter:
                 if post:
                     req_model = getattr(models, post.requestBodyModel, EmptyBody)
                     route_info = RouteInfo(
-                        request_model=req_model, description=post.description
+                        request_model=req_model,
+                        description=post.description,
+                        summary=path_item.post.summary,
                     )
                     if post.responseModels and post.responseModels.get(200):
                         resp_model = getattr(models, post.responseModels[200])
@@ -182,7 +185,7 @@ class SpecRouter:
             router.post(
                 path,
                 name=route_name,
-                summary=route_name,
+                summary=route_info.summary or route_name,
                 description=route_info.description,
                 response_description=route_info.response_description,
                 response_model=resp_model,

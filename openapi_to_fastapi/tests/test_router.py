@@ -140,6 +140,7 @@ def test_routes_meta_info(app, client, specs_root):
     assert route.tags == ["Routes"]
     assert route.description == "Route description"
     assert route.response_description == "Response description"
+    assert route.summary == "Weather/Current/Metric Data Product"
 
     # test that generating OpenAPI still works
     app.include_router(router)
@@ -160,7 +161,7 @@ def test_routes_meta_info_custom_name(app, client, specs_root):
     route = [r for r in router.routes if r.path == "/Company/BasicInfo"][0]
 
     assert route.name == "Company/BasicInfo"
-    assert route.summary == "Company/BasicInfo"
+    assert route.summary == "Company/BasicInfo Data Product"
     # description by default is coming from spec
     assert route.description == "Information about the company"
 
@@ -183,6 +184,7 @@ def test_custom_route_name_for_default_post(app, client, specs_root):
     route = [r for r in router.routes if r.path == "/Company/BasicInfo"][0]
     assert route.name == "Company/BasicInfo"
     assert route.description == "Information about the company"
+    assert route.summary == "Company/BasicInfo Data Product"
 
     # test that generating OpenAPI still works
     app.include_router(router)
