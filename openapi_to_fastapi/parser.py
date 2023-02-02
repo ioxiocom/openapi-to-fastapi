@@ -63,8 +63,8 @@ def parse_operation(spec: dict, name: str) -> Optional[Operation]:
     operation = Operation(responses={}, responseModels={})
     operation.parameters = parse_parameters(spec[name])  # type: ignore
 
-    if data.get("description"):
-        operation.description = data.get("description")
+    operation.summary = data.get("summary")
+    operation.description = data.get("description")
 
     request_body_model = get_model_name_from_ref(data.get("requestBody", {}))
     if request_body_model:
@@ -72,6 +72,8 @@ def parse_operation(spec: dict, name: str) -> Optional[Operation]:
 
     operation.responseModels = {}
     for resp_code, resp_data in data.get("responses", {}).items():
+        if not resp_code.isdigit():
+            continue
         code = int(resp_code)
         model_name = get_model_name_from_ref(resp_data)
         if model_name:
