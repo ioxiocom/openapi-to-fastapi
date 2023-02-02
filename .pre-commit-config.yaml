@@ -36,7 +36,8 @@ repos:
     hooks:
       - id: prettier
   - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
+    # Note: 6.0.0+ doesn't work with 3.7 anymore
+    rev: 5.0.4
     hooks:
       - id: flake8
   - repo: https://github.com/twu/skjold
