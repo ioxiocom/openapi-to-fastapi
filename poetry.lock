@@ -129,11 +129,11 @@ cron = ["capturer (>=2.4)"]
 
 [[package]]
 name = "datamodel-code-generator"
-version = "0.13.5"
+version = "0.17.1"
 description = "Datamodel Code Generator"
 category = "main"
 optional = false
-python-versions = ">=3.6.1,<4.0.0"
+python-versions = ">=3.7,<4.0"
 
 [package.dependencies]
 argcomplete = ">=1.10,<3.0"
@@ -142,11 +142,13 @@ genson = ">=1.2.1,<2.0"
 inflect = ">=4.1.0,<6.0"
 isort = ">=4.3.21,<6.0"
 jinja2 = ">=2.10.1,<4.0"
-openapi-spec-validator = ">=0.2.8,<0.4"
+openapi-spec-validator = ">=0.2.8,<=0.5.1"
+packaging = "*"
 prance = ">=0.18.2,<1.0"
 pydantic = [
+    {version = ">=1.10.0,<2.0", extras = ["email"], markers = "python_version >= \"3.11\""},
     {version = ">=1.5.1,<2.0", extras = ["email"], markers = "python_version < \"3.10\""},
-    {version = ">=1.9.0,<2.0", extras = ["email"], markers = "python_version >= \"3.10\""},
+    {version = ">=1.9.0,<2.0", extras = ["email"], markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
 ]
 PySnooper = ">=0.4.1,<2.0.0"
 toml = ">=0.10.0,<1.0.0"
@@ -898,7 +900,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "flake8 (<5)", "pytest-co
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7,<4.0.0"
-content-hash = "3e26dc2b7184c464b4567dd1bc901616e6cdba9b85c6ead4c5a2b45bfd595dee"
+content-hash = "880aaef35d0039c20772a977ad393b8b34a2d750f678d6e36a286836dff15408"
 
 [metadata.files]
 anyio = []

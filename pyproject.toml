@@ -15,7 +15,7 @@ openapi-validator = "openapi_to_fastapi.cli:cli_validate_specs"
 
 [tool.poetry.dependencies]
 python = ">=3.7,<4.0.0"
-datamodel-code-generator = "^0.13.1"
+datamodel-code-generator = "^0.17.1"
 fastapi = "^0.94.0"
 genson = "^1.2.2"
 click = "^8.1.3"
