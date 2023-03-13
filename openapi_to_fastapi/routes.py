@@ -58,7 +58,7 @@ class SpecRouter:
     def __init__(
         self,
         specs_path: Union[str, Path],
-        validators: List[Type[BaseValidator]] = None,
+        validators: Optional[List[Type[BaseValidator]]] = None,
     ):
         self._validators = [DefaultValidator] + (validators or [])  # type: ignore
         self._routes = RoutesMapping(post_map={}, get_map={})
@@ -116,12 +116,12 @@ class SpecRouter:
     def post(
         self,
         path: Optional[str] = None,
-        name: str = None,
-        tags: List[str] = None,
-        description: str = None,
-        response_description: str = None,
+        name: Optional[str] = None,
+        tags: Optional[List[str]] = None,
+        description: Optional[str] = None,
+        response_description: Optional[str] = None,
         name_factory: Optional[Callable] = None,
-        responses: Dict[Union[int, str], Dict[str, Any]] = None,
+        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
     ):
         """
         Define implementation for a specific POST route
