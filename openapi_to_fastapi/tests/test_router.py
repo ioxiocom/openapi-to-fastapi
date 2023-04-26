@@ -189,3 +189,17 @@ def test_custom_route_name_for_default_post(app, client, specs_root):
     # test that generating OpenAPI still works
     app.include_router(router)
     assert app.openapi()
+
+
+def test_headers_in_route_info_post(app, client, specs_root):
+    spec_router = SpecRouter(specs_root / "ihan")
+
+    post_map = spec_router.post_map
+    company_basic_info_headers = post_map["/Company/BasicInfo"].headers
+    assert "authorization" in company_basic_info_headers
+    assert "x-authorization-provider" in company_basic_info_headers
+
+    weather_headers = post_map["/Weather/Current/Metric"].headers
+    assert "authorization" in weather_headers
+    assert "x-authorization-provider" in weather_headers
+    assert "x-signature" in weather_headers
