@@ -2,7 +2,7 @@ from typing import Dict, List, Optional
 
 from fastapi.openapi import models as oas
 
-from .models import Operation, PathItem
+from .models import Header, Operation, PathItem
 from .validator import MissingParameter
 
 
@@ -60,7 +60,7 @@ def parse_operation(spec: dict, name: str) -> Optional[Operation]:
         return None
 
     data = spec[name]
-    operation = Operation(responses={}, responseModels={})
+    operation = Operation(responses={}, responseModels={}, headers={})
     operation.parameters = parse_parameters(spec[name])  # type: ignore
 
     operation.summary = data.get("summary")
@@ -78,6 +78,12 @@ def parse_operation(spec: dict, name: str) -> Optional[Operation]:
         model_name = get_model_name_from_ref(resp_data)
         if model_name:
             operation.responseModels[code] = model_name
+
+    operation.headers = {
+        parameter["name"].lower(): Header(**parameter)
+        for parameter in data.get("parameters", {})
+        if "name" in parameter and parameter.get("in").lower() == "header"
+    }
 
     return operation
 

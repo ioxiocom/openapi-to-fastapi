@@ -1,10 +1,11 @@
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 import pydantic
 from fastapi import APIRouter
+from fastapi.openapi import models as oas
 
 from .model_generator import load_models
 from .parser import parse_openapi_spec
@@ -37,6 +38,7 @@ class RouteInfo:
     request_model: Optional[Type[pydantic.BaseModel]] = None
     response_model: Optional[Type[pydantic.BaseModel]] = None
     responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None
+    headers: Dict[str, oas.Header] = field(default_factory=dict)
     handler: Callable = dummy_route
 
     def merge_with(self, another_route: "RouteInfo"):
@@ -66,6 +68,20 @@ class SpecRouter:
         self.specs_path = Path(specs_path)
         self._validate_and_parse_specs()
 
+    @property
+    def get_map(self) -> Optional[Dict[str, RouteInfo]]:
+        """
+        Get a mapping of parsed paths to route info for GET routes.
+        """
+        return self._routes.get_map
+
+    @property
+    def post_map(self) -> Optional[Dict[str, RouteInfo]]:
+        """
+        Get a mapping of parsed paths to route info for POST routes.
+        """
+        return self._routes.post_map
+
     def _validate_and_parse_specs(self):
         """
         Validate OpenAPI specs and parse required information from them
@@ -90,6 +106,7 @@ class SpecRouter:
                         request_model=req_model,
                         description=post.description,
                         summary=path_item.post.summary,
+                        headers=path_item.post.headers,
                     )
                     if post.responseModels and post.responseModels.get(200):
                         resp_model = getattr(models, post.responseModels[200])
