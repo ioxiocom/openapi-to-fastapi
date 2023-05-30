@@ -256,17 +256,17 @@ cron = ["capturer (>=2.4)"]
 
 [[package]]
 name = "datamodel-code-generator"
-version = "0.17.1"
+version = "0.19.0"
 description = "Datamodel Code Generator"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "datamodel_code_generator-0.17.1-py3-none-any.whl", hash = "sha256:8e3bf374dff69ce65e07feed3322f5b83432cc7d3974169865ede69c4b98bf92"},
-    {file = "datamodel_code_generator-0.17.1.tar.gz", hash = "sha256:a22e1f71b76c149a0fbb8214f7b1e4926c01bf5bc94ce5264a932d65599fb4a9"},
+    {file = "datamodel_code_generator-0.19.0-py3-none-any.whl", hash = "sha256:082c8c0f72b42953fb04bd4a4e76bbd7b1cd4c07f3000fbd019c9a196e2bdf6b"},
+    {file = "datamodel_code_generator-0.19.0.tar.gz", hash = "sha256:13ca59944d6aa347dd5f674f90f5d7f1004626a65ecade6c364b90c1a47ef499"},
 ]
 
 [package.dependencies]
-argcomplete = ">=1.10,<3.0"
+argcomplete = ">=1.10,<4.0"
 black = ">=19.10b0"
 genson = ">=1.2.1,<2.0"
 inflect = ">=4.1.0,<6.0"
@@ -276,16 +276,12 @@ openapi-spec-validator = ">=0.2.8,<=0.5.1"
 packaging = "*"
 prance = ">=0.18.2,<1.0"
 pydantic = [
-    {version = ">=1.10.0,<2.0", extras = ["email"], markers = "python_version >= \"3.11\""},
-    {version = ">=1.5.1,<2.0", extras = ["email"], markers = "python_version < \"3.10\""},
-    {version = ">=1.9.0,<2.0", extras = ["email"], markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
+    {version = ">=1.10.0,<2.0.0", extras = ["email"], markers = "python_version >= \"3.11\" and python_version < \"4.0\""},
+    {version = ">=1.5.1,<2.0.0", extras = ["email"], markers = "python_version < \"3.10\""},
+    {version = ">=1.9.0,<2.0.0", extras = ["email"], markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
 ]
 PySnooper = ">=0.4.1,<2.0.0"
 toml = ">=0.10.0,<1.0.0"
-typed-ast = [
-    {version = ">=1.5.0", markers = "python_full_version >= \"3.9.8\""},
-    {version = ">=1.4.2", markers = "python_full_version < \"3.9.8\""},
-]
 
 [package.extras]
 http = ["httpx"]
@@ -1451,4 +1447,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.7,<4.0.0"
-content-hash = "42ae4f0c66fead9f520cfd3ba31f5552b1b934c3f7849ff5c2eeefc257cbcb83"
+content-hash = "1e73f903bc9bbc4a44fd83428b8ce0fa2c56d7470647d69668945927657f7985"
