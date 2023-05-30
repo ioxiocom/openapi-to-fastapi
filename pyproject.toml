@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openapi-to-fastapi"
-version = "0.8.0"
+version = "0.8.1"
 description = "Create FastAPI routes from OpenAPI spec"
 authors = ["IOXIO Ltd"]
 license = "BSD-3-Clause"
