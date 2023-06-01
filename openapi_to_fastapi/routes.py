@@ -34,6 +34,7 @@ class RouteInfo:
     response_description: str = "Successful response"
     tags: Optional[List[str]] = None
     summary: Optional[str] = None
+    deprecated: Optional[bool] = None
 
     request_model: Optional[Type[pydantic.BaseModel]] = None
     response_model: Optional[Type[pydantic.BaseModel]] = None
@@ -107,10 +108,26 @@ class SpecRouter:
                         description=post.description,
                         summary=path_item.post.summary,
                         headers=path_item.post.headers,
+                        deprecated=path_item.post.deprecated,
+                        responses={},
                     )
-                    if post.responseModels and post.responseModels.get(200):
-                        resp_model = getattr(models, post.responseModels[200])
-                        route_info.response_model = resp_model
+
+                    for status_code, parsed_response in post.parsedResponses.items():
+                        resp_model = getattr(models, parsed_response.model_name)
+                        description = parsed_response.description
+                        if status_code == 200:
+                            route_info.response_model = resp_model
+                        else:
+                            # An entry for an additional response for FastAPI routes
+                            # https://fastapi.tiangolo.com/advanced/additional-responses/#additional-response-with-model
+                            additional_response = {}
+                            if parsed_response.description:
+                                additional_response["description"] = description
+                            if parsed_response.model_name:
+                                additional_response["model"] = resp_model
+
+                            route_info.responses[status_code] = additional_response
+
                     self._routes.post_map[path] = route_info
 
     def get_response_model(
@@ -208,5 +225,6 @@ class SpecRouter:
                 response_model=resp_model,
                 responses=route_info.responses,
                 tags=route_info.tags,
+                deprecated=route_info.deprecated,
             )(handler)
         return router

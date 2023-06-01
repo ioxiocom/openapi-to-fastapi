@@ -2,7 +2,7 @@ from typing import Dict, List, Optional
 
 from fastapi.openapi import models as oas
 
-from .models import Header, Operation, PathItem
+from .models import Header, Operation, ParsedResponse, PathItem
 from .validator import MissingParameter
 
 
@@ -60,24 +60,30 @@ def parse_operation(spec: dict, name: str) -> Optional[Operation]:
         return None
 
     data = spec[name]
-    operation = Operation(responses={}, responseModels={}, headers={})
+    operation = Operation(
+        responses={},
+        parsedResponses={},
+        headers={},
+    )
     operation.parameters = parse_parameters(spec[name])  # type: ignore
 
     operation.summary = data.get("summary")
     operation.description = data.get("description")
+    operation.deprecated = data.get("deprecated")
 
     request_body_model = get_model_name_from_ref(data.get("requestBody", {}))
     if request_body_model:
         operation.requestBodyModel = request_body_model
 
-    operation.responseModels = {}
     for resp_code, resp_data in data.get("responses", {}).items():
         if not resp_code.isdigit():
             continue
         code = int(resp_code)
-        model_name = get_model_name_from_ref(resp_data)
-        if model_name:
-            operation.responseModels[code] = model_name
+
+        operation.parsedResponses[code] = ParsedResponse(
+            description=resp_data.get("description"),
+            model_name=get_model_name_from_ref(resp_data),
+        )
 
     operation.headers = {
         parameter["name"].lower(): Header(**parameter)
