@@ -1,6 +1,7 @@
 import pydantic
 import pytest
 from fastapi import Header
+from pydantic import BaseModel
 
 from openapi_to_fastapi.model_generator import load_models
 from openapi_to_fastapi.routes import SpecRouter
@@ -213,3 +214,25 @@ def test_deprecated(app, specs_root):
 
     spec = app.openapi()
     assert spec["paths"]["/draft/Appliances/CoffeeBrewer"]["post"]["deprecated"] is True
+
+
+def test_custom_responses(app, specs_root):
+    brew_spec = "/draft/Appliances/CoffeeBrewer"
+    spec_router = SpecRouter(specs_root / "ihan")
+
+    router = spec_router.to_fastapi_router()
+    app.include_router(router)
+
+    # Check the response is added to OpenAPI spec and has a description and schema
+    spec = app.openapi()
+    responses = spec["paths"][brew_spec]["post"]["responses"]
+    assert responses["418"]["description"] == "I'm a teapot"
+    assert "$ref" in responses["418"]["content"]["application/json"]["schema"]
+
+    # Check internals of the route and the parsed model
+    route = [r for r in router.routes if r.path == brew_spec][0]
+    assert route.responses[418]["description"] == "I'm a teapot"
+    model = route.responses[418]["model"]
+    assert type(model) == type(BaseModel)
+    assert "ok" in model.__fields__
+    assert "errorMessage" in model.__fields__
