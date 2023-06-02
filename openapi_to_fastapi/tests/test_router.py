@@ -203,3 +203,13 @@ def test_headers_in_route_info_post(app, client, specs_root):
     assert "authorization" in weather_headers
     assert "x-authorization-provider" in weather_headers
     assert "x-signature" in weather_headers
+
+
+def test_deprecated(app, specs_root):
+    spec_router = SpecRouter(specs_root / "ihan")
+
+    router = spec_router.to_fastapi_router()
+    app.include_router(router)
+
+    spec = app.openapi()
+    assert spec["paths"]["/draft/Appliances/CoffeeBrewer"]["post"]["deprecated"] is True

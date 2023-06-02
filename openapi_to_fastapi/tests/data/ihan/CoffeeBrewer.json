@@ -1,0 +1,364 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Coffee brewer",
+    "description": "Coffee brewer",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/draft/Appliances/CoffeeBrewer": {
+      "post": {
+        "summary": "Coffee brewer",
+        "description": "Coffee brewer",
+        "operationId": "request_draft_Appliances_CoffeeBrewer",
+        "parameters": [
+          {
+            "description": "Optional consent token",
+            "required": false,
+            "schema": {
+              "title": "X-Consent-Token",
+              "type": "string",
+              "description": "Optional consent token"
+            },
+            "name": "x-consent-token",
+            "in": "header"
+          },
+          {
+            "description": "The login token. Value should be \"Bearer [token]\"",
+            "required": false,
+            "schema": {
+              "title": "Authorization",
+              "type": "string",
+              "description": "The login token. Value should be \"Bearer [token]\""
+            },
+            "name": "authorization",
+            "in": "header"
+          },
+          {
+            "description": "The bare domain of the system that provided the token.",
+            "required": false,
+            "schema": {
+              "title": "X-Authorization-Provider",
+              "type": "string",
+              "description": "The bare domain of the system that provided the token."
+            },
+            "name": "x-authorization-provider",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoffeeBrewingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoffeeBrewingResponse"
+                }
+              }
+            }
+          },
+          "418": {
+            "description": "I'm a teapot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeaPotError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseFor401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentRequired"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSourceNotFound"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseFor502"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSourceUnavailable"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway Timeout",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSourceTimeout"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuthorizationRequired": {
+        "title": "AuthorizationRequired",
+        "type": "object",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string",
+            "default": "Authorization is required to access this data source"
+          }
+        }
+      },
+      "AuthorizationRequiredForUnpublished": {
+        "title": "AuthorizationRequiredForUnpublished",
+        "type": "object",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string",
+            "default": "Unpublished data sources require preview token"
+          }
+        }
+      },
+      "CoffeeBrewingRequest": {
+        "title": "CoffeeBrewingRequest",
+        "required": ["brew"],
+        "type": "object",
+        "properties": {
+          "brew": {
+            "title": "Brew",
+            "type": "string",
+            "description": "Kind of drink to brew",
+            "example": "coffee"
+          }
+        }
+      },
+      "CoffeeBrewingResponse": {
+        "title": "CoffeeBrewingResponse",
+        "required": ["ok"],
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "OK",
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "ConsentRequired": {
+        "title": "ConsentRequired",
+        "type": "object",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string",
+            "default": "Consent is required to access this data source"
+          }
+        }
+      },
+      "DataSourceError": {
+        "title": "DataSourceError",
+        "required": ["status", "error"],
+        "type": "object",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string",
+            "default": "Data source returned an error"
+          },
+          "status": {
+            "title": "Status code",
+            "minimum": 400.0,
+            "type": "integer",
+            "description": "Status code from the data source"
+          },
+          "error": {
+            "title": "Original error",
+            "description": "Raw error from the data source"
+          }
+        }
+      },
+      "DataSourceNotFound": {
+        "title": "DataSourceNotFound",
+        "type": "object",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string",
+            "default": "Requested data source is not found"
+          }
+        }
+      },
+      "DataSourceTimeout": {
+        "title": "DataSourceTimeout",
+        "type": "object",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string",
+            "default": "Timeout reached while communicating with the data source"
+          }
+        }
+      },
+      "DataSourceUnavailable": {
+        "title": "DataSourceUnavailable",
+        "type": "object",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string",
+            "default": "Error while communicating with the data source"
+          }
+        }
+      },
+      "DoesNotConformToDefinition": {
+        "title": "DoesNotConformToDefinition",
+        "type": "object",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string",
+            "default": "Response from the data source does not conform to definition"
+          }
+        }
+      },
+      "HTTPValidationError": {
+        "title": "HTTPValidationError",
+        "type": "object",
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            }
+          }
+        }
+      },
+      "ResponseFor401": {
+        "title": "ResponseFor401",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/AuthorizationRequired"
+          },
+          {
+            "$ref": "#/components/schemas/AuthorizationRequiredForUnpublished"
+          }
+        ]
+      },
+      "ResponseFor502": {
+        "title": "ResponseFor502",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/DoesNotConformToDefinition"
+          },
+          {
+            "$ref": "#/components/schemas/DataSourceError"
+          }
+        ]
+      },
+      "TeaPotError": {
+        "title": "TeaPotError",
+        "required": ["ok", "errorMessage"],
+        "type": "object",
+        "properties": {
+          "ok": {
+            "title": "OK",
+            "type": "boolean",
+            "example": false
+          },
+          "errorMessage": {
+            "title": "Error message",
+            "type": "string",
+            "example": "I'm a teapot"
+          }
+        }
+      },
+      "ValidationError": {
+        "title": "ValidationError",
+        "required": ["loc", "msg", "type"],
+        "type": "object",
+        "properties": {
+          "loc": {
+            "title": "Location",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            }
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
