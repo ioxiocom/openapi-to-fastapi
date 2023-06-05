@@ -50,8 +50,8 @@ class RouteInfo:
 
 @dataclass
 class RoutesMapping:
-    default_get: RouteInfo = RouteInfo()
-    default_post: RouteInfo = RouteInfo()
+    default_get: RouteInfo = field(default_factory=RouteInfo)
+    default_post: RouteInfo = field(default_factory=RouteInfo)
     get_map: Optional[Dict[str, RouteInfo]] = None
     post_map: Optional[Dict[str, RouteInfo]] = None
 
