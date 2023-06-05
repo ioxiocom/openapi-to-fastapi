@@ -38,7 +38,7 @@ class RouteInfo:
 
     request_model: Optional[Type[pydantic.BaseModel]] = None
     response_model: Optional[Type[pydantic.BaseModel]] = None
-    responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None
+    responses: Optional[Dict[int, Dict[str, Any]]] = None
     headers: Dict[str, oas.Header] = field(default_factory=dict)
     handler: Callable = dummy_route
 
@@ -47,6 +47,22 @@ class RouteInfo:
             another_value = getattr(another_route, v)
             if another_value is not None:
                 setattr(self, v, another_value)
+
+    def get_additional_response_models(self) -> Dict[int, Type[pydantic.BaseModel]]:
+        """
+        Get a mapping of additional response code to model.
+
+        :return: A mapping of a status code to a Pydantic model with the fields defined
+        in the spec.
+        """
+
+        if not self.responses:
+            return {}
+        return {
+            status: additional_response_data["model"]
+            for status, additional_response_data in self.responses.items()
+            if self.responses and "model" in additional_response_data
+        }
 
 
 @dataclass
@@ -130,6 +146,19 @@ class SpecRouter:
 
                     self._routes.post_map[path] = route_info
 
+    def get_route_info(self, path: str, method: str) -> Optional[RouteInfo]:
+        """
+        Get the RouteInfo for a specific path and method
+        :param path: Path of the route, e.g "/pets"
+        :param method: HTTP Method, e.g "post" or "GET"
+        :return: The corresponding RouteInfo.
+        """
+        store = getattr(self._routes, f"{method.lower()}_map", None)
+        if store is None:
+            raise ValueError("Unsupported HTTP method")
+        route_info: Optional[RouteInfo] = store.get(path)
+        return route_info
+
     def get_response_model(
         self, path: str, method: str
     ) -> Optional[Type[pydantic.BaseModel]]:
@@ -139,10 +168,7 @@ class SpecRouter:
         :param method: HTTP Method, e.g "post" or "GET"
         :return: Pydantic model with the fields defined in spec
         """
-        store = getattr(self._routes, f"{method.lower()}_map", None)
-        if store is None:
-            raise ValueError("Unsupported HTTP method")
-        route_info: RouteInfo = store.get(path)
+        route_info = self.get_route_info(path=path, method=method)
         if not route_info:
             return None
         return route_info.response_model

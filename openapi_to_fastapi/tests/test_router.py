@@ -223,6 +223,11 @@ def test_custom_responses(app, specs_root):
     router = spec_router.to_fastapi_router()
     app.include_router(router)
 
+    # Check custom response models are parsed
+    route_info = spec_router.get_route_info(brew_spec, "post")
+    resp_models = route_info.get_additional_response_models()
+    assert type(resp_models[418]) == type(BaseModel)
+
     # Check the response is added to OpenAPI spec and has a description and schema
     spec = app.openapi()
     responses = spec["paths"][brew_spec]["post"]["responses"]
