@@ -63,18 +63,18 @@ def validate_component_schema(spec: dict, components_schema: dict):
         )
     if not ref.startswith("#/components/schemas/"):
         raise SchemaMissing(
-            "Request and response models must be defined at"
+            "Request and response models must be defined in the"
             '"#/components/schemas/" section'
         )
     model_name = ref.split("/")[-1]
     if not components_schema.get(model_name):
-        raise SchemaMissing(f"Component schema is missed for {model_name}")
+        raise SchemaMissing(f"Component schema is missing for {model_name}")
 
 
 def validate_spec(spec: dict):
     """
-    Validate that OpenAPI spec looks like a standard. For example, that
-    it contains only one POST method defined.
+    Validate that OpenAPI spec looks like a data product definition. For example, that
+    it only has one POST method defined.
 
     :param spec: OpenAPI spec
     :raises OpenApiValidationError: When OpenAPI spec is incorrect
