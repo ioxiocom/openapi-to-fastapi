@@ -78,9 +78,11 @@ class SpecRouter:
         self,
         specs_path: Union[str, Path],
         validators: Optional[List[Type[BaseValidator]]] = None,
+        format_code: bool = False,
     ):
         self._validators = [DefaultValidator] + (validators or [])  # type: ignore
         self._routes = RoutesMapping(post_map={}, get_map={})
+        self._format_code = format_code
 
         self.specs_path = Path(specs_path)
         self._validate_and_parse_specs()
@@ -115,7 +117,7 @@ class SpecRouter:
             raw_spec = spec_path.read_text(encoding="utf8")
             json_spec = json.loads(raw_spec)
             for path, path_item in parse_openapi_spec(json_spec).items():
-                models = load_models(raw_spec, path)
+                models = load_models(raw_spec, path, format_code=self._format_code)
                 post = path_item.post
                 if post:
                     req_model = getattr(models, post.requestBodyModel, EmptyBody)

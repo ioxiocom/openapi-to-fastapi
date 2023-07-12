@@ -11,12 +11,13 @@ from datamodel_code_generator.parser.openapi import OpenAPIParser
 from openapi_to_fastapi.logger import logger
 
 
-def generate_model_from_schema(schema: str) -> str:
+def generate_model_from_schema(schema: str, format_code: bool = False) -> str:
     """
     Given an OpenAPI schema, generate pydantic models from everything defined
     in the "components/schemas" section
 
     :param schema: Content of an OpenAPI spec, plain text
+    :param format_code: Whether to format generated code
     :return: Importable python code with generated models
     """
     parser = OpenAPIParser(
@@ -37,7 +38,7 @@ def generate_model_from_schema(schema: str) -> str:
         aliases=None,
     )
 
-    result = parser.parse()
+    result = parser.parse(format_=format_code)
     return str(result)
 
 
@@ -52,7 +53,9 @@ def _clean_tempfile(tmp_file, delete=True):
                 Path(tmp_file.name).unlink()
 
 
-def load_models(schema: str, name: str = "", cleanup: bool = True):
+def load_models(
+    schema: str, name: str = "", cleanup: bool = True, format_code: bool = False
+):
     """
     Generate pydantic models from OpenAPI spec and return a python module,
     which contains all the models from the "components/schemas" section.
@@ -61,6 +64,7 @@ def load_models(schema: str, name: str = "", cleanup: bool = True):
     :param schema: OpenAPI spec, plain text
     :param name: Prefix for a module name, optional
     :param cleanup: Whether to remove a file with models afterwards
+    :param format_code: Whether to format generated code
     :return: Module with pydantic models
     """
     prefix = name.replace("/", "").replace(" ", "").replace("\\", "") + "_"
@@ -70,7 +74,7 @@ def load_models(schema: str, name: str = "", cleanup: bool = True):
         ),
         delete=cleanup,
     ) as tmp_file:
-        model_py = generate_model_from_schema(schema)
+        model_py = generate_model_from_schema(schema, format_code)
         tmp_file.write(model_py)
         if not cleanup:
             logger.info("Generated module %s: %s", name, tmp_file.name)
