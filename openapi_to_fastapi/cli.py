@@ -13,7 +13,6 @@ import coloredlogs
 from openapi_to_fastapi.validator.core import BaseValidator, DefaultValidator
 
 from .routes import SpecRouter
-from .validator import ihan_standards
 
 logger = logging.getLogger("openapi_to_fastapi_cli")
 coloredlogs.install(logger=logger, fmt="%(message)s")
@@ -75,7 +74,7 @@ def validate_specs(path: Path, modules: List[str], extra_validators: List[str]) 
 
 
 def _load_extra_validator_modules(modules: List[str]) -> list:
-    validator_modules = [ihan_standards]
+    validator_modules = []
     for module_path in modules:
         module_name = f"oas_models_{uuid.uuid4()}"
         spec = importlib.util.spec_from_file_location(module_name, module_path)

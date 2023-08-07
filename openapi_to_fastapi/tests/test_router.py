@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from openapi_to_fastapi.model_generator import load_models
 from openapi_to_fastapi.routes import SpecRouter
 
-# values aligned with the response defined in the data/ihan/CompanyBasicInfo.json
+# values aligned with the response defined in the data/definitions/CompanyBasicInfo.json
 company_basic_info_resp = {
     "name": "Company",
     "companyId": "test",
@@ -15,16 +15,16 @@ company_basic_info_resp = {
 }
 
 
-def test_routes_are_created(ihan_client, specs_root):
-    assert ihan_client.post("/Company/BasicInfo").status_code != 404
-    assert ihan_client.post("/Non/Existing/Stuff").status_code == 404
+def test_routes_are_created(definitions_client, specs_root):
+    assert definitions_client.post("/Company/BasicInfo").status_code != 404
+    assert definitions_client.post("/Non/Existing/Stuff").status_code == 404
 
-    assert ihan_client.get("/Company/BasicInfo").status_code == 405
-    assert ihan_client.get("/Non/Existing/Stuff").status_code == 404
+    assert definitions_client.get("/Company/BasicInfo").status_code == 405
+    assert definitions_client.get("/Non/Existing/Stuff").status_code == 404
 
 
 def test_pydantic_model_loading(specs_root):
-    path = specs_root / "ihan" / "CompanyBasicInfo.json"
+    path = specs_root / "definitions" / "CompanyBasicInfo.json"
     raw_spec = path.read_text(encoding="utf8")
     module = load_models(raw_spec, "/Company/BasicInfo")
     assert module.BasicCompanyInfoRequest
@@ -45,7 +45,7 @@ def test_pydantic_model_loading(specs_root):
 
 
 def test_weather_route_payload_errors(app, specs_root, client, snapshot):
-    spec_router = SpecRouter(specs_root / "ihan")
+    spec_router = SpecRouter(specs_root / "definitions")
 
     @spec_router.post("/Weather/Current/Metric")
     def weather_metric(request):
@@ -63,7 +63,7 @@ def test_weather_route_payload_errors(app, specs_root, client, snapshot):
 
 
 def test_company_custom_post_route(app, client, specs_root, snapshot):
-    spec_router = SpecRouter(specs_root / "ihan")
+    spec_router = SpecRouter(specs_root / "definitions")
 
     @spec_router.post("/Company/BasicInfo")
     def weather_metric(request):
@@ -77,7 +77,7 @@ def test_company_custom_post_route(app, client, specs_root, snapshot):
 
 
 def test_default_post_handler(app, client, specs_root, snapshot):
-    spec_router = SpecRouter(specs_root / "ihan")
+    spec_router = SpecRouter(specs_root / "definitions")
 
     @spec_router.post()
     def company_info(request):
@@ -90,7 +90,7 @@ def test_default_post_handler(app, client, specs_root, snapshot):
 
 
 def test_custom_route_definitions(app, client, specs_root, snapshot):
-    spec_router = SpecRouter(specs_root / "ihan")
+    spec_router = SpecRouter(specs_root / "definitions")
 
     @spec_router.post("/Weather/Current/Metric")
     def weather_metric(request, vendor: str, auth_header: str = Header(...)):
@@ -103,7 +103,7 @@ def test_custom_route_definitions(app, client, specs_root, snapshot):
 
 
 def test_response_model_is_parsed(app, client, specs_root):
-    spec_router = SpecRouter(specs_root / "ihan")
+    spec_router = SpecRouter(specs_root / "definitions")
 
     @spec_router.post("/Weather/Current/Metric")
     def weather_metric(request):
@@ -123,7 +123,7 @@ def test_response_model_is_parsed(app, client, specs_root):
 
 
 def test_routes_meta_info(app, client, specs_root):
-    spec_router = SpecRouter(specs_root / "ihan")
+    spec_router = SpecRouter(specs_root / "definitions")
 
     @spec_router.post(
         "/Weather/Current/Metric",
@@ -149,7 +149,7 @@ def test_routes_meta_info(app, client, specs_root):
 
 
 def test_routes_meta_info_custom_name(app, client, specs_root):
-    spec_router = SpecRouter(specs_root / "ihan")
+    spec_router = SpecRouter(specs_root / "definitions")
 
     def name_factory(path="", **kwargs):
         return path[1:]
@@ -172,7 +172,7 @@ def test_routes_meta_info_custom_name(app, client, specs_root):
 
 
 def test_custom_route_name_for_default_post(app, client, specs_root):
-    spec_router = SpecRouter(specs_root / "ihan")
+    spec_router = SpecRouter(specs_root / "definitions")
 
     def name_factory(path="", **kwargs):
         return path[1:]
@@ -193,7 +193,7 @@ def test_custom_route_name_for_default_post(app, client, specs_root):
 
 
 def test_headers_in_route_info_post(app, client, specs_root):
-    spec_router = SpecRouter(specs_root / "ihan")
+    spec_router = SpecRouter(specs_root / "definitions")
 
     post_map = spec_router.post_map
     company_basic_info_headers = post_map["/Company/BasicInfo"].headers
@@ -207,7 +207,7 @@ def test_headers_in_route_info_post(app, client, specs_root):
 
 
 def test_deprecated(app, specs_root):
-    spec_router = SpecRouter(specs_root / "ihan")
+    spec_router = SpecRouter(specs_root / "definitions")
 
     router = spec_router.to_fastapi_router()
     app.include_router(router)
@@ -218,7 +218,7 @@ def test_deprecated(app, specs_root):
 
 def test_custom_responses(app, specs_root):
     brew_spec = "/draft/Appliances/CoffeeBrewer"
-    spec_router = SpecRouter(specs_root / "ihan")
+    spec_router = SpecRouter(specs_root / "definitions")
 
     router = spec_router.to_fastapi_router()
     app.include_router(router)
