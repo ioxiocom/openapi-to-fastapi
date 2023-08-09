@@ -23,8 +23,8 @@ def client(app):
 
 
 @pytest.fixture
-def ihan_client(specs_root):
+def definitions_client(specs_root):
     app = FastAPI()
-    spec_router = SpecRouter(specs_root / "ihan")
+    spec_router = SpecRouter(specs_root / "definitions")
     app.include_router(spec_router.to_fastapi_router())
     return TestClient(app)
