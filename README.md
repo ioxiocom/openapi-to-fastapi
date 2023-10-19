@@ -251,6 +251,25 @@ This validator can also be reused when generating routes:
 router = SpecRouter(specs, validators=[MyValidator])
 ```
 
+## Development
+
+You will need:
+
+- Python 3.7+ (though 3.11+ might have some issues with dependencies)
+- [pre-commit](https://pre-commit.com/#install)
+
+Before working on the project, make sure you run:
+
+```shell
+pre-commit install
+```
+
+After making changes you can run tests:
+
+```shell
+poetry run invoke test
+```
+
 ## License
 
 This code is released under the BSD 3-Clause license. Details in the
