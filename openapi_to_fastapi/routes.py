@@ -118,7 +118,9 @@ class SpecRouter:
             raw_spec = spec_path.read_text(encoding="utf8")
             json_spec = json.loads(raw_spec)
             for path, path_item in parse_openapi_spec(json_spec).items():
-                models = load_models(raw_spec, path, cleanup=cleanup, format_code=self._format_code)
+                models = load_models(
+                    raw_spec, path, cleanup=cleanup, format_code=self._format_code
+                )
                 post = path_item.post
                 if post:
                     req_model = getattr(models, post.requestBodyModel, EmptyBody)
