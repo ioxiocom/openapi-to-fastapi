@@ -258,10 +258,16 @@ You will need:
 - Python 3.10
 - [pre-commit](https://pre-commit.com/#install)
 
-Make sure you run
+Before working on the project, make sure you run:
 
 ```shell
 pre-commit install
+```
+
+After making changes you can run tests:
+
+```shell
+poetry run invoke test
 ```
 
 ## License
