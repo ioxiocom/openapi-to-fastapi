@@ -5,7 +5,7 @@ from contextlib import contextmanager, suppress
 from pathlib import Path
 
 from datamodel_code_generator import PythonVersion
-from datamodel_code_generator.model import pydantic as pydantic_model
+from datamodel_code_generator.model import pydantic_v2 as pydantic_model
 from datamodel_code_generator.parser.openapi import OpenAPIParser
 
 from openapi_to_fastapi.logger import logger
@@ -23,13 +23,13 @@ def generate_model_from_schema(schema: str, format_code: bool = False) -> str:
     parser = OpenAPIParser(
         source=schema,
         data_model_type=pydantic_model.BaseModel,
-        data_model_root_type=pydantic_model.CustomRootType,
+        data_model_root_type=pydantic_model.RootModel,
         data_type_manager_type=pydantic_model.DataTypeManager,
         data_model_field_type=pydantic_model.DataModelField,
         base_class="pydantic.BaseModel",
         custom_template_dir=None,
         extra_template_data=None,
-        target_python_version=PythonVersion.PY_37,
+        target_python_version=PythonVersion.PY_38,
         dump_resolve_reference_action=None,
         validation=True,
         field_constraints=False,
