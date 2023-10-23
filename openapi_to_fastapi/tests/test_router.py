@@ -39,7 +39,7 @@ def test_pydantic_model_loading(specs_root):
         module.BasicCompanyInfoRequest(companyId=[])
 
     company_info_req = module.BasicCompanyInfoRequest(companyId="abc")
-    assert company_info_req.dict() == {"companyId": "abc"}
+    assert company_info_req.model_dump() == {"companyId": "abc"}
 
     assert module.ValidationError(loc=[], msg="Crap", type="Error")
 
