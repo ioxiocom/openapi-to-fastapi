@@ -82,7 +82,7 @@ def parse_operation(spec: dict, name: str) -> Optional[Operation]:
 
         operation.parsedResponses[code] = ParsedResponse(
             description=resp_data.get("description"),
-            model_name=get_model_name_from_ref(resp_data),
+            name=get_model_name_from_ref(resp_data),
         )
 
     operation.headers = {

@@ -14,7 +14,7 @@ class Header(oas.Header):
 
 class ParsedResponse(BaseModel):
     description: Optional[str] = None
-    model_name: Optional[str] = None
+    name: Optional[str] = None
 
 
 class Operation(oas.Operation):
