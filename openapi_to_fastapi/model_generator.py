@@ -31,6 +31,9 @@ def generate_model_from_schema(schema: str, format_code: bool = False) -> str:
         extra_template_data=None,
         target_python_version=PythonVersion.PY_38,
         dump_resolve_reference_action=None,
+        # Validation of OpenAPI 3.1 specs isn't supported right now. Issues: 
+        # https://github.com/koxudaxi/datamodel-code-generator/issues/1649 and 
+        # https://github.com/RonnyPfannschmidt/prance/issues/95
         validation=False,
         field_constraints=False,
         snake_case_field=False,
