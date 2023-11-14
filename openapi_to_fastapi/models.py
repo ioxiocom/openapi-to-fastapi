@@ -5,17 +5,16 @@ This module extends some of FastAPI models, to include extra data into them
 from typing import Dict, Optional
 
 from fastapi.openapi import models as oas
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Header(oas.Header):
-    class Config:
-        extra = "ignore"
+    model_config = ConfigDict(extra="ignore")
 
 
 class ParsedResponse(BaseModel):
-    description: Optional[str]
-    model_name: Optional[str]
+    description: Optional[str] = None
+    name: Optional[str] = None
 
 
 class Operation(oas.Operation):

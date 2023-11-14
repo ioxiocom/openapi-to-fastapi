@@ -39,7 +39,7 @@ def test_pydantic_model_loading(specs_root):
         module.BasicCompanyInfoRequest(companyId=[])
 
     company_info_req = module.BasicCompanyInfoRequest(companyId="abc")
-    assert company_info_req.dict() == {"companyId": "abc"}
+    assert company_info_req.model_dump() == {"companyId": "abc"}
 
     assert module.ValidationError(loc=[], msg="Crap", type="Error")
 
@@ -141,7 +141,7 @@ def test_routes_meta_info(app, client, specs_root):
     assert route.tags == ["Routes"]
     assert route.description == "Route description"
     assert route.response_description == "Response description"
-    assert route.summary == "Weather/Current/Metric Data Product"
+    assert route.summary == "Current weather in a given location"
 
     # test that generating OpenAPI still works
     app.include_router(router)
@@ -203,7 +203,7 @@ def test_headers_in_route_info_post(app, client, specs_root):
     weather_headers = post_map["/Weather/Current/Metric"].headers
     assert "authorization" in weather_headers
     assert "x-authorization-provider" in weather_headers
-    assert "x-signature" in weather_headers
+    assert "x-consent-token" in weather_headers
 
 
 def test_deprecated(app, specs_root):

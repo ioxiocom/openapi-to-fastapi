@@ -6,17 +6,21 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots["test_weather_route_payload_errors Missing payload"] = {
+snapshots["test_custom_route_definitions Custom route definition"] = {
     "detail": [
         {
-            "loc": ["body", "lat"],
-            "msg": "field required",
-            "type": "value_error.missing",
+            "input": None,
+            "loc": ["query", "vendor"],
+            "msg": "Field required",
+            "type": "missing",
+            "url": "https://errors.pydantic.dev/2.4/v/missing",
         },
         {
-            "loc": ["body", "lon"],
-            "msg": "field required",
-            "type": "value_error.missing",
+            "input": None,
+            "loc": ["header", "auth-header"],
+            "msg": "Field required",
+            "type": "missing",
+            "url": "https://errors.pydantic.dev/2.4/v/missing",
         },
     ]
 }
@@ -24,30 +28,38 @@ snapshots["test_weather_route_payload_errors Missing payload"] = {
 snapshots["test_weather_route_payload_errors Incorrect payload type"] = {
     "detail": [
         {
+            "input": "1,1.2",
             "loc": ["body", "lat"],
-            "msg": "value is not a valid float",
-            "type": "type_error.float",
+            "msg": "Input should be a valid number, unable to parse string as a number",
+            "type": "float_parsing",
+            "url": "https://errors.pydantic.dev/2.4/v/float_parsing",
         },
         {
-            "ctx": {"limit_value": 180.0},
+            "ctx": {"le": 180.0},
+            "input": "99999",
             "loc": ["body", "lon"],
-            "msg": "ensure this value is less than or equal to 180.0",
-            "type": "value_error.number.not_le",
+            "msg": "Input should be less than or equal to 180",
+            "type": "less_than_equal",
+            "url": "https://errors.pydantic.dev/2.4/v/less_than_equal",
         },
     ]
 }
 
-snapshots["test_custom_route_definitions Custom route definition"] = {
+snapshots["test_weather_route_payload_errors Missing payload"] = {
     "detail": [
         {
-            "loc": ["query", "vendor"],
-            "msg": "field required",
-            "type": "value_error.missing",
+            "input": {},
+            "loc": ["body", "lat"],
+            "msg": "Field required",
+            "type": "missing",
+            "url": "https://errors.pydantic.dev/2.4/v/missing",
         },
         {
-            "loc": ["header", "auth-header"],
-            "msg": "field required",
-            "type": "value_error.missing",
+            "input": {},
+            "loc": ["body", "lon"],
+            "msg": "Field required",
+            "type": "missing",
+            "url": "https://errors.pydantic.dev/2.4/v/missing",
         },
     ]
 }

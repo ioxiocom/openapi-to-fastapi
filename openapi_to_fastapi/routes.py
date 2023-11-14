@@ -134,7 +134,7 @@ class SpecRouter:
                     )
 
                     for status_code, parsed_response in post.parsedResponses.items():
-                        resp_model = getattr(models, parsed_response.model_name)
+                        resp_model = getattr(models, parsed_response.name)
                         description = parsed_response.description
                         if status_code == 200:
                             route_info.response_model = resp_model
@@ -144,7 +144,7 @@ class SpecRouter:
                             additional_response = {}
                             if parsed_response.description:
                                 additional_response["description"] = description
-                            if parsed_response.model_name:
+                            if parsed_response.name:
                                 additional_response["model"] = resp_model
 
                             route_info.responses[status_code] = additional_response

@@ -1,54 +1,67 @@
 {
-  "openapi": "3.0.2",
+  "openapi": "3.1.0",
   "info": {
-    "title": "Current Weather (Metric)",
-    "description": "Data Product for current weather with metric units",
+    "title": "Current weather in a given location",
+    "description": "Current weather in a given location in metric units",
     "version": "1.0.0"
   },
   "paths": {
     "/Weather/Current/Metric": {
       "post": {
-        "summary": "Weather/Current/Metric Data Product",
-        "description": "Current weather in metric units",
-        "operationId": "requestCurrentWeatherMetricData",
+        "summary": "Current weather in a given location",
+        "description": "Current weather in a given location in metric units",
+        "operationId": "request_Metric",
         "parameters": [
           {
-            "description": "HMAC-RSA256 signature for the request using Product Gateway's public key",
+            "name": "x-consent-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Consent token",
+              "title": "X-Consent-Token"
+            },
+            "description": "Consent token"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The login token. Value should be \"Bearer [token]\"",
+              "title": "Authorization"
+            },
+            "description": "The login token. Value should be \"Bearer [token]\""
+          },
+          {
+            "name": "x-authorization-provider",
+            "in": "header",
             "required": false,
             "schema": {
-              "title": "Request signature",
-              "type": "string",
-              "description": "HMAC-RSA256 signature for the request using Product Gateway's public key"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The bare domain of the system that provided the token.",
+              "title": "X-Authorization-Provider"
             },
-            "name": "x-signature",
-            "in": "header"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "header",
-            "name": "X-Authorization-Provider",
-            "description": "Provider domain"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "header",
-            "name": "Authorization",
-            "description": "User bearer token"
+            "description": "The bare domain of the system that provided the token."
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CurrentWeatherMetricRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -60,6 +73,100 @@
                 }
               }
             }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "444": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSourceNotFound"
+                }
+              }
+            },
+            "description": "Additional Response"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSourceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadGateway"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "text/plain": {},
+              "text/html": {},
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailable"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "text/plain": {},
+              "text/html": {},
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GatewayTimeout"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          },
+          "550": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DoesNotConformToDefinition"
+                }
+              }
+            },
+            "description": "Additional Response"
           },
           "422": {
             "description": "Validation Error",
@@ -77,31 +184,73 @@
   },
   "components": {
     "schemas": {
-      "CurrentWeatherMetricRequest": {
-        "title": "CurrentWeatherMetricRequest",
-        "required": ["lat", "lon"],
+      "BadGateway": {
+        "properties": {},
         "type": "object",
+        "title": "BadGateway",
+        "description": "This response is reserved by Product Gateway."
+      },
+      "CurrentWeatherMetricRequest": {
         "properties": {
           "lat": {
-            "title": "Latitude",
-            "maximum": 90,
-            "minimum": -90,
             "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Latitude",
             "description": "The latitude coordinate of the desired location",
-            "example": 60.192059
+            "examples": [60.192059]
           },
           "lon": {
-            "title": "Longitude",
-            "maximum": 180,
-            "minimum": -180,
             "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Longitude",
             "description": "The longitude coordinate of the desired location",
-            "example": 24.945831
+            "examples": [24.945831]
           }
-        }
+        },
+        "type": "object",
+        "required": ["lat", "lon"],
+        "title": "CurrentWeatherMetricRequest"
       },
       "CurrentWeatherMetricResponse": {
-        "title": "CurrentWeatherMetricResponse",
+        "properties": {
+          "humidity": {
+            "type": "number",
+            "title": "Current relative air humidity in %",
+            "examples": [72]
+          },
+          "pressure": {
+            "type": "number",
+            "title": "Current air pressure in hPa",
+            "examples": [1007]
+          },
+          "rain": {
+            "type": "boolean",
+            "title": "Rain status",
+            "description": "If it's currently raining or not."
+          },
+          "temp": {
+            "type": "number",
+            "minimum": -273.15,
+            "title": "Current temperature in Celsius",
+            "examples": [17.3]
+          },
+          "windSpeed": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Current wind speed in m/s",
+            "examples": [2.1]
+          },
+          "windDirection": {
+            "type": "number",
+            "maximum": 360.0,
+            "minimum": 0.0,
+            "title": "Current wind direction in meteorological wind direction degrees",
+            "examples": [220.0]
+          }
+        },
+        "type": "object",
         "required": [
           "humidity",
           "pressure",
@@ -110,78 +259,174 @@
           "windSpeed",
           "windDirection"
         ],
-        "type": "object",
+        "title": "CurrentWeatherMetricResponse"
+      },
+      "DataSourceError": {
         "properties": {
-          "humidity": {
-            "title": "Current relative air humidity in %",
-            "type": "number",
-            "example": 72
+          "type": {
+            "type": "string",
+            "title": "Error type",
+            "description": "Error identifier"
           },
-          "pressure": {
-            "title": "Current air pressure in hPa",
-            "type": "number",
-            "example": 1007
-          },
-          "rain": {
-            "title": "Rain status",
-            "type": "boolean",
-            "description": "If it's currently raining or not."
-          },
-          "temp": {
-            "title": "Current temperature in Celsius",
-            "minimum": -273.15,
-            "type": "number",
-            "example": 17.3
-          },
-          "windSpeed": {
-            "title": "Current wind speed in m/s",
-            "minimum": 0,
-            "type": "number",
-            "example": 2.1
-          },
-          "windDirection": {
-            "title": "Current wind direction in meteorological wind direction degrees",
-            "maximum": 360,
-            "minimum": 0,
-            "type": "number",
-            "example": 220
+          "message": {
+            "type": "string",
+            "title": "Error message",
+            "description": "Error description"
           }
-        }
+        },
+        "type": "object",
+        "required": ["type", "message"],
+        "title": "DataSourceError"
+      },
+      "DataSourceNotFound": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Error message",
+            "description": "Error description",
+            "default": "Data source not found"
+          }
+        },
+        "type": "object",
+        "title": "DataSourceNotFound",
+        "description": "This response is reserved by Product Gateway."
+      },
+      "DoesNotConformToDefinition": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Response from data source does not conform to definition"
+          },
+          "data_source_status_code": {
+            "type": "integer",
+            "title": "Data source status code",
+            "description": "HTTP status code returned from the data source"
+          }
+        },
+        "type": "object",
+        "required": ["data_source_status_code"],
+        "title": "DoesNotConformToDefinition",
+        "description": "This response is reserved by Product Gateway."
+      },
+      "Forbidden": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Error type",
+            "description": "Error identifier"
+          },
+          "message": {
+            "type": "string",
+            "title": "Error message",
+            "description": "Error description"
+          }
+        },
+        "type": "object",
+        "required": ["type", "message"],
+        "title": "Forbidden"
+      },
+      "GatewayTimeout": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Error message",
+            "description": "Error description",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "GatewayTimeout",
+        "description": "This response is reserved by Product Gateway."
       },
       "HTTPValidationError": {
-        "title": "HTTPValidationError",
-        "type": "object",
         "properties": {
           "detail": {
-            "title": "Detail",
-            "type": "array",
             "items": {
               "$ref": "#/components/schemas/ValidationError"
-            }
+            },
+            "type": "array",
+            "title": "Detail"
           }
-        }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "NotFound": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Error type",
+            "description": "Error identifier"
+          },
+          "message": {
+            "type": "string",
+            "title": "Error message",
+            "description": "Error description"
+          }
+        },
+        "type": "object",
+        "required": ["type", "message"],
+        "title": "NotFound"
+      },
+      "ServiceUnavailable": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Error message",
+            "description": "Error description",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "ServiceUnavailable",
+        "description": "This response is reserved by Product Gateway."
+      },
+      "Unauthorized": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Error type",
+            "description": "Error identifier"
+          },
+          "message": {
+            "type": "string",
+            "title": "Error message",
+            "description": "Error description"
+          }
+        },
+        "type": "object",
+        "required": ["type", "message"],
+        "title": "Unauthorized"
       },
       "ValidationError": {
-        "title": "ValidationError",
-        "required": ["loc", "msg", "type"],
-        "type": "object",
         "properties": {
           "loc": {
-            "title": "Location",
-            "type": "array",
             "items": {
-              "type": "string"
-            }
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
           },
           "msg": {
-            "title": "Message",
-            "type": "string"
+            "type": "string",
+            "title": "Message"
           },
           "type": {
-            "title": "Error Type",
-            "type": "string"
+            "type": "string",
+            "title": "Error Type"
           }
-        }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
       }
     }
   }
