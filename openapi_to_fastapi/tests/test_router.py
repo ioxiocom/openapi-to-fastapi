@@ -226,7 +226,7 @@ def test_custom_responses(app, specs_root):
     # Check custom response models are parsed
     route_info = spec_router.get_route_info(brew_spec, "post")
     resp_models = route_info.get_additional_response_models()
-    assert type(resp_models[418]) == type(BaseModel)
+    assert issubclass(resp_models[418], BaseModel)
 
     # Check the response is added to OpenAPI spec and has a description and schema
     spec = app.openapi()
@@ -238,6 +238,6 @@ def test_custom_responses(app, specs_root):
     route = [r for r in router.routes if r.path == brew_spec][0]
     assert route.responses[418]["description"] == "I'm a teapot"
     model = route.responses[418]["model"]
-    assert type(model) == type(BaseModel)
-    assert "ok" in model.__fields__
-    assert "errorMessage" in model.__fields__
+    assert issubclass(model, BaseModel)
+    assert "ok" in model.model_fields
+    assert "errorMessage" in model.model_fields
