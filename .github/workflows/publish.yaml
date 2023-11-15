@@ -1,4 +1,4 @@
-name: Build and upload to PyPI
+name: Build and publish to PyPI
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - "*"
 
 jobs:
-  build_and_upload:
-    name: Build and upload
+  build_and_publish:
+    name: Build and publish
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🔁
