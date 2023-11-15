@@ -2,6 +2,8 @@ name: Test the library with latest python
 
 on:
   workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, edited]
 
 jobs:
   run_tests:
