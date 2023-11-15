@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.12", "3.x", "<4"]
+        python-version: ["3.12", "3.x-dev"]
     steps:
       - name: Checkout 🔁
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
