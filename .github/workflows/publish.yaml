@@ -2,8 +2,6 @@ name: Build and publish to PyPI
 
 on:
   push:
-    branches:
-      - "ci/use-trusted-publisher"
     tags:
       - "*"
 
@@ -11,7 +9,7 @@ jobs:
   build_and_publish:
     name: Build and publish
     runs-on: ubuntu-latest
-    environment: testpypi
+    environment: PyPI
     permissions:
       # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
@@ -30,23 +28,14 @@ jobs:
       - name: Install dependencies 🛠
         run: poetry install
 
-      #      - name: Run pre-commit 🤔
-      #        run: pre-commit run --all-files
-      #
-      #      - name: Run tests 🌈
-      #        run: poetry run invoke test
+      - name: Run pre-commit 🤔
+        run: pre-commit run --all-files
+
+      - name: Run tests 🌈
+        run: poetry run invoke test
 
       - name: Build the package 📦
         run: poetry build
 
       - name: Publish package to PyPI 🙌
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-#      - name: Publish package to PyPI 🙌
-#        run: |
-#          set -e
-#          poetry config http-basic.pypi "__token__" "${PYPI_TOKEN}"
-#          poetry publish --build
-#        env:
-#          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
