@@ -37,7 +37,7 @@ jobs:
       #        run: poetry run invoke test
 
       - name: Build the package 📦
-        run: poetry run invoke test
+        run: poetry build
 
       - name: Publish package to PyPI 🙌
         uses: pypa/gh-action-pypi-publish@release/v1
