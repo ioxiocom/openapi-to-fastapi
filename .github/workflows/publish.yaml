@@ -2,17 +2,15 @@ name: Build and publish to PyPI
 
 on:
   push:
+    branches:
+      - ci/use-trusted-publisher-test
     tags:
       - "*"
 
 jobs:
-  build_and_publish:
-    name: Build and publish
+  build:
+    name: Test and build
     runs-on: ubuntu-latest
-    environment: PyPI
-    permissions:
-      # IMPORTANT: this permission is mandatory for trusted publishing
-      id-token: write
     steps:
       - name: Checkout 🔁
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
@@ -37,5 +35,30 @@ jobs:
       - name: Build the package 📦
         run: poetry build
 
-      - name: Publish package to PyPI 🙌
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Publish build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-dist
+          path: dist
+  publish:
+    name: Publish
+    needs: build
+    runs-on: ubuntu-latest
+    environment: PyPI
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: package-dist
+          path: dist
+
+      - name: LS
+        run: |
+          ls -la
+          ls -la dist
+
+#      - name: Publish package to PyPI 🙌
+#        uses: pypa/gh-action-pypi-publish@release/v1
