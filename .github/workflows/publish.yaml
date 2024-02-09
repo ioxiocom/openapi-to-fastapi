@@ -6,13 +6,9 @@ on:
       - "*"
 
 jobs:
-  build_and_publish:
-    name: Build and publish
+  build:
+    name: Test and build
     runs-on: ubuntu-latest
-    environment: PyPI
-    permissions:
-      # IMPORTANT: this permission is mandatory for trusted publishing
-      id-token: write
     steps:
       - name: Checkout 🔁
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
@@ -36,6 +32,26 @@ jobs:
 
       - name: Build the package 📦
         run: poetry build
+
+      - name: Publish build artifact ⬆️
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 #v4.3.1
+        with:
+          name: package-dist
+          path: dist
+  publish:
+    name: Publish
+    needs: build
+    runs-on: ubuntu-latest
+    environment: PyPI
+    permissions:
+      # this permission is mandatory for trusted publishing
+      id-token: write
+    steps:
+      - name: Download build artifact ⬇️
+        uses: actions/download-artifact@eaceaf801fd36c7dee90939fad912460b18a1ffe #v4.1.2
+        with:
+          name: package-dist
+          path: dist
 
       - name: Publish package to PyPI 🙌
         uses: pypa/gh-action-pypi-publish@2f6f737ca5f74c637829c0f5c3acd0e29ea5e8bf #v1.8.11
