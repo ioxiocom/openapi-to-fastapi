@@ -70,6 +70,7 @@ def parse_operation(spec: dict, name: str) -> Optional[Operation]:
     operation.summary = data.get("summary")
     operation.description = data.get("description")
     operation.deprecated = data.get("deprecated")
+    operation.tags = data.get("tags")
 
     request_body_model = get_model_name_from_ref(data.get("requestBody", {}))
     if request_body_model:

@@ -11,6 +11,7 @@
         "summary": "Coffee brewer",
         "description": "Coffee brewer",
         "operationId": "request_draft_Appliances_CoffeeBrewer",
+        "tags": ["Coffee"],
         "parameters": [
           {
             "description": "Optional consent token",
