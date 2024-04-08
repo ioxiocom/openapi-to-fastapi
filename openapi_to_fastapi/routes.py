@@ -128,9 +128,9 @@ class SpecRouter:
                         request_model=req_model,
                         description=post.description,
                         tags=post.tags,
-                        summary=path_item.post.summary,
-                        headers=path_item.post.headers,
-                        deprecated=path_item.post.deprecated,
+                        summary=post.summary,
+                        headers=post.headers,
+                        deprecated=post.deprecated,
                         responses={},
                     )
 
