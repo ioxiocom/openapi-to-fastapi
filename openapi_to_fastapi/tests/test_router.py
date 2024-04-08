@@ -216,6 +216,16 @@ def test_deprecated(app, specs_root):
     assert spec["paths"]["/draft/Appliances/CoffeeBrewer"]["post"]["deprecated"] is True
 
 
+def test_tags(app, specs_root):
+    spec_router = SpecRouter(specs_root / "definitions")
+
+    router = spec_router.to_fastapi_router()
+    app.include_router(router)
+
+    spec = app.openapi()
+    assert spec["paths"]["/draft/Appliances/CoffeeBrewer"]["post"]["tags"] == ["Coffee"]
+
+
 def test_custom_responses(app, specs_root):
     brew_spec = "/draft/Appliances/CoffeeBrewer"
     spec_router = SpecRouter(specs_root / "definitions")

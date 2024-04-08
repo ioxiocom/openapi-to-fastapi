@@ -127,9 +127,10 @@ class SpecRouter:
                     route_info = RouteInfo(
                         request_model=req_model,
                         description=post.description,
-                        summary=path_item.post.summary,
-                        headers=path_item.post.headers,
-                        deprecated=path_item.post.deprecated,
+                        tags=post.tags,
+                        summary=post.summary,
+                        headers=post.headers,
+                        deprecated=post.deprecated,
                         responses={},
                     )
 
