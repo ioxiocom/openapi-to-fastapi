@@ -1,0 +1,22 @@
+{
+  "detail": [
+    {
+      "input": null,
+      "loc": [
+        "query",
+        "vendor"
+      ],
+      "msg": "Field required",
+      "type": "missing"
+    },
+    {
+      "input": null,
+      "loc": [
+        "header",
+        "auth-header"
+      ],
+      "msg": "Field required",
+      "type": "missing"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "detail": [
+    {
+      "input": {},
+      "loc": [
+        "body",
+        "lat"
+      ],
+      "msg": "Field required",
+      "type": "missing"
+    },
+    {
+      "input": {},
+      "loc": [
+        "body",
+        "lon"
+      ],
+      "msg": "Field required",
+      "type": "missing"
+    }
+  ]
+}

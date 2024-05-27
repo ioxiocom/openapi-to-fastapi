@@ -44,7 +44,7 @@ def test_pydantic_model_loading(specs_root):
     assert module.ValidationError(loc=[], msg="Crap", type="Error")
 
 
-def test_weather_route_payload_errors(app, specs_root, client, snapshot):
+def test_weather_route_payload_errors(app, specs_root, client, json_snapshot):
     spec_router = SpecRouter(specs_root / "definitions")
 
     @spec_router.post("/Weather/Current/Metric")
@@ -55,14 +55,14 @@ def test_weather_route_payload_errors(app, specs_root, client, snapshot):
 
     resp = client.post("/Weather/Current/Metric", json={})
     assert resp.status_code == 422
-    snapshot.assert_match(resp.json(), "Missing payload")
+    assert json_snapshot == resp.json(), "Missing payload"
 
     resp = client.post("/Weather/Current/Metric", json={"lat": "1,1.2", "lon": "99999"})
     assert resp.status_code == 422
-    snapshot.assert_match(resp.json(), "Incorrect payload type")
+    assert json_snapshot == resp.json(), "Incorrect payload type"
 
 
-def test_company_custom_post_route(app, client, specs_root, snapshot):
+def test_company_custom_post_route(app, client, specs_root):
     spec_router = SpecRouter(specs_root / "definitions")
 
     @spec_router.post("/Company/BasicInfo")
@@ -76,7 +76,7 @@ def test_company_custom_post_route(app, client, specs_root, snapshot):
     assert resp.json() == company_basic_info_resp
 
 
-def test_default_post_handler(app, client, specs_root, snapshot):
+def test_default_post_handler(app, client, specs_root):
     spec_router = SpecRouter(specs_root / "definitions")
 
     @spec_router.post()
@@ -89,7 +89,7 @@ def test_default_post_handler(app, client, specs_root, snapshot):
     assert resp.json() == company_basic_info_resp
 
 
-def test_custom_route_definitions(app, client, specs_root, snapshot):
+def test_custom_route_definitions(app, client, specs_root, json_snapshot):
     spec_router = SpecRouter(specs_root / "definitions")
 
     @spec_router.post("/Weather/Current/Metric")
@@ -99,7 +99,7 @@ def test_custom_route_definitions(app, client, specs_root, snapshot):
     app.include_router(spec_router.to_fastapi_router())
     resp = client.post("/Weather/Current/Metric", json={"lat": "30.5", "lon": 1.56})
     assert resp.status_code == 422
-    snapshot.assert_match(resp.json(), "Custom route definition")
+    assert json_snapshot == resp.json(), "Custom route definition"
 
 
 def test_response_model_is_parsed(app, client, specs_root):
