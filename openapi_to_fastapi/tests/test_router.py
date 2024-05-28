@@ -1,7 +1,8 @@
 import pydantic
 import pytest
-from fastapi import Header
+from fastapi import Depends, Header, HTTPException, Request
 from pydantic import BaseModel
+from starlette.status import HTTP_418_IM_A_TEAPOT
 
 from openapi_to_fastapi.model_generator import load_models
 from openapi_to_fastapi.routes import SpecRouter
@@ -251,3 +252,36 @@ def test_custom_responses(app, specs_root):
     assert issubclass(model, BaseModel)
     assert "ok" in model.model_fields
     assert "errorMessage" in model.model_fields
+
+
+def test_dependencies(app, client, specs_root):
+    async def teapot_dependency(request: Request):
+        """
+        Dependency used just for testing.
+        """
+        if request.headers.get("X-Brew") != "tea":
+            raise HTTPException(
+                HTTP_418_IM_A_TEAPOT,
+                "I'm a teapot",
+            )
+
+    spec_router = SpecRouter(specs_root / "definitions")
+
+    @spec_router.post("/Company/BasicInfo", dependencies=[Depends(teapot_dependency)])
+    def weather_metric(request):
+        return company_basic_info_resp
+
+    app.include_router(spec_router.to_fastapi_router())
+
+    # Normal request, not affected by the dependency
+    resp = client.post(
+        "/Company/BasicInfo", json={"companyId": "test"}, headers={"X-Brew": "tea"}
+    )
+    assert resp.status_code == 200, resp.json()
+    assert resp.json() == company_basic_info_resp
+
+    # Custom request, affected by the dependency
+    resp = client.post(
+        "/Company/BasicInfo", json={"companyId": "test"}, headers={"X-Brew": "coffee"}
+    )
+    assert resp.status_code == 418, resp.json()
