@@ -1,10 +1,10 @@
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
 
 import pydantic
-from fastapi import APIRouter
+from fastapi import APIRouter, params
 from fastapi.openapi import models as oas
 
 from .model_generator import load_models
@@ -35,6 +35,7 @@ class RouteInfo:
     tags: Optional[List[str]] = None
     summary: Optional[str] = None
     deprecated: Optional[bool] = None
+    dependencies: Optional[Sequence[params.Depends]] = None
 
     request_model: Optional[Type[pydantic.BaseModel]] = None
     response_model: Optional[Type[pydantic.BaseModel]] = None
@@ -188,6 +189,7 @@ class SpecRouter:
         response_description: Optional[str] = None,
         name_factory: Optional[Callable] = None,
         responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        dependencies: Optional[Sequence[params.Depends]] = None,
     ):
         """
         Define implementation for a specific POST route
@@ -201,6 +203,7 @@ class SpecRouter:
         :param description: Route description. Got from OpenAPI spec by default
         :param response_description: Description of the response
         :param responses: Possible responses the route may return. Used in documentation
+        :param dependencies: Possible dependencies to add to the route.
         """
 
         def _wrapper(fn):
@@ -215,6 +218,7 @@ class SpecRouter:
             route_info.tags = tags
             route_info.name_factory = name_factory
             route_info.responses = responses
+            route_info.dependencies = dependencies
 
             if response_description:
                 route_info.response_description = response_description
@@ -258,5 +262,6 @@ class SpecRouter:
                 responses=route_info.responses,
                 tags=route_info.tags,
                 deprecated=route_info.deprecated,
+                dependencies=route_info.dependencies,
             )(handler)
         return router

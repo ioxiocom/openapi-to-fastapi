@@ -1,0 +1,25 @@
+{
+  "detail": [
+    {
+      "input": "1,1.2",
+      "loc": [
+        "body",
+        "lat"
+      ],
+      "msg": "Input should be a valid number, unable to parse string as a number",
+      "type": "float_parsing"
+    },
+    {
+      "ctx": {
+        "le": 180.0
+      },
+      "input": "99999",
+      "loc": [
+        "body",
+        "lon"
+      ],
+      "msg": "Input should be less than or equal to 180",
+      "type": "less_than_equal"
+    }
+  ]
+}

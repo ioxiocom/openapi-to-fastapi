@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -21,12 +21,12 @@ repos:
         args: ["--fix=crlf"]
         files: \.bat$
   - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+    rev: 5.13.2
     hooks:
       - id: isort
         language_version: python3
   - repo: https://github.com/psf/black
-    rev: 23.11.0
+    rev: 24.4.2
     hooks:
       - id: black
         language_version: python3
@@ -34,11 +34,12 @@ repos:
     rev: v3.1.0
     hooks:
       - id: prettier
+        exclude: "^openapi_to_fastapi/tests/__snapshots__/"
   - repo: https://github.com/pycqa/flake8
-    rev: 6.1.0
+    rev: 7.0.0
     hooks:
       - id: flake8
   - repo: https://github.com/twu/skjold
-    rev: v0.6.1
+    rev: v0.6.2
     hooks:
       - id: skjold

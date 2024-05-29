@@ -1,7 +1,8 @@
 import pydantic
 import pytest
-from fastapi import Header
+from fastapi import Depends, Header, HTTPException, Request
 from pydantic import BaseModel
+from starlette.status import HTTP_418_IM_A_TEAPOT
 
 from openapi_to_fastapi.model_generator import load_models
 from openapi_to_fastapi.routes import SpecRouter
@@ -44,7 +45,7 @@ def test_pydantic_model_loading(specs_root):
     assert module.ValidationError(loc=[], msg="Crap", type="Error")
 
 
-def test_weather_route_payload_errors(app, specs_root, client, snapshot):
+def test_weather_route_payload_errors(app, specs_root, client, json_snapshot):
     spec_router = SpecRouter(specs_root / "definitions")
 
     @spec_router.post("/Weather/Current/Metric")
@@ -55,14 +56,14 @@ def test_weather_route_payload_errors(app, specs_root, client, snapshot):
 
     resp = client.post("/Weather/Current/Metric", json={})
     assert resp.status_code == 422
-    snapshot.assert_match(resp.json(), "Missing payload")
+    assert json_snapshot == resp.json(), "Missing payload"
 
     resp = client.post("/Weather/Current/Metric", json={"lat": "1,1.2", "lon": "99999"})
     assert resp.status_code == 422
-    snapshot.assert_match(resp.json(), "Incorrect payload type")
+    assert json_snapshot == resp.json(), "Incorrect payload type"
 
 
-def test_company_custom_post_route(app, client, specs_root, snapshot):
+def test_company_custom_post_route(app, client, specs_root):
     spec_router = SpecRouter(specs_root / "definitions")
 
     @spec_router.post("/Company/BasicInfo")
@@ -76,7 +77,7 @@ def test_company_custom_post_route(app, client, specs_root, snapshot):
     assert resp.json() == company_basic_info_resp
 
 
-def test_default_post_handler(app, client, specs_root, snapshot):
+def test_default_post_handler(app, client, specs_root):
     spec_router = SpecRouter(specs_root / "definitions")
 
     @spec_router.post()
@@ -89,7 +90,7 @@ def test_default_post_handler(app, client, specs_root, snapshot):
     assert resp.json() == company_basic_info_resp
 
 
-def test_custom_route_definitions(app, client, specs_root, snapshot):
+def test_custom_route_definitions(app, client, specs_root, json_snapshot):
     spec_router = SpecRouter(specs_root / "definitions")
 
     @spec_router.post("/Weather/Current/Metric")
@@ -99,7 +100,7 @@ def test_custom_route_definitions(app, client, specs_root, snapshot):
     app.include_router(spec_router.to_fastapi_router())
     resp = client.post("/Weather/Current/Metric", json={"lat": "30.5", "lon": 1.56})
     assert resp.status_code == 422
-    snapshot.assert_match(resp.json(), "Custom route definition")
+    assert json_snapshot == resp.json(), "Custom route definition"
 
 
 def test_response_model_is_parsed(app, client, specs_root):
@@ -251,3 +252,36 @@ def test_custom_responses(app, specs_root):
     assert issubclass(model, BaseModel)
     assert "ok" in model.model_fields
     assert "errorMessage" in model.model_fields
+
+
+def test_dependencies(app, client, specs_root):
+    async def teapot_dependency(request: Request):
+        """
+        Dependency used just for testing.
+        """
+        if request.headers.get("X-Brew") != "tea":
+            raise HTTPException(
+                HTTP_418_IM_A_TEAPOT,
+                "I'm a teapot",
+            )
+
+    spec_router = SpecRouter(specs_root / "definitions")
+
+    @spec_router.post("/Company/BasicInfo", dependencies=[Depends(teapot_dependency)])
+    def weather_metric(request):
+        return company_basic_info_resp
+
+    app.include_router(spec_router.to_fastapi_router())
+
+    # Normal request, not affected by the dependency
+    resp = client.post(
+        "/Company/BasicInfo", json={"companyId": "test"}, headers={"X-Brew": "tea"}
+    )
+    assert resp.status_code == 200, resp.json()
+    assert resp.json() == company_basic_info_resp
+
+    # Custom request, affected by the dependency
+    resp = client.post(
+        "/Company/BasicInfo", json={"companyId": "test"}, headers={"X-Brew": "coffee"}
+    )
+    assert resp.status_code == 418, resp.json()
