@@ -36,7 +36,7 @@ repos:
       - id: prettier
         exclude: "^openapi_to_fastapi/tests/__snapshots__/"
   - repo: https://github.com/pycqa/flake8
-    rev: 7.0.0
+    rev: 7.1.1
     hooks:
       - id: flake8
   - repo: https://github.com/twu/skjold

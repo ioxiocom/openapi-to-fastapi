@@ -1,0 +1,6 @@
+ignore:
+  CVE-2019-8341:
+  - expires: 2025-01-01T00:00:00+0000
+    package: jinja2
+    reason: 'No fix available'
+version: '1.1'
