@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.12", "3.13"]
+        python-version: ["3.13", "3.14"]
     steps:
       - name: Checkout 🔁
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
@@ -21,7 +21,7 @@ jobs:
           allow-prereleases: true
 
       - name: Install Poetry and pre-commit 💈
-        run: pip install poetry pre-commit
+        run: pip install poetry==1.8.5 pre-commit
 
       - name: Install dependencies 🛠
         run: poetry install
