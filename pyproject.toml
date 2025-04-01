@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openapi-to-fastapi"
-version = "0.18.0"
+version = "0.18.1"
 description = "Create FastAPI routes from OpenAPI spec"
 authors = ["IOXIO Ltd"]
 license = "BSD-3-Clause"
@@ -19,7 +19,7 @@ datamodel-code-generator = "^0.28.5"
 fastapi = "^0.115.12"
 click = "^8.1.8"
 coloredlogs = "^15.0.1"
-pydantic = "^2.11.1"
+pydantic = {version = "^2.11.1", extras = ["email"]}
 
 [tool.poetry.group.dev.dependencies]
 isort = "^5.13.2"
