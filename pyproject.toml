@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openapi-to-fastapi"
-version = "0.17.0"
+version = "0.18.0"
 description = "Create FastAPI routes from OpenAPI spec"
 authors = ["IOXIO Ltd"]
 license = "BSD-3-Clause"
@@ -14,18 +14,18 @@ packages = [
 openapi-validator = "openapi_to_fastapi.cli:cli_validate_specs"
 
 [tool.poetry.dependencies]
-python = ">=3.8.1,<4.0.0"
-datamodel-code-generator = "^0.26.1"
-fastapi = "^0.115.2"
-click = "^8.1.7"
+python = "^3.9"
+datamodel-code-generator = "^0.28.5"
+fastapi = "^0.115.12"
+click = "^8.1.8"
 coloredlogs = "^15.0.1"
-pydantic = "^2.9.2"
+pydantic = "^2.11.1"
 
 [tool.poetry.group.dev.dependencies]
 isort = "^5.13.2"
-pytest = "^8.3.3"
-pytest-asyncio = "^0.24.0"
-flake8 = "^7.1.1"
+pytest = "^8.3.5"
+pytest-asyncio = "^0.26.0"
+flake8 = "^7.2.0"
 mypy = "^1.12.0"
 invoke = "^2.2.0"
 httpx = "^0.27.2"
