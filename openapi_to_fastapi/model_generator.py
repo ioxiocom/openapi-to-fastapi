@@ -3,23 +3,50 @@ import tempfile
 import uuid
 from contextlib import contextmanager, suppress
 from pathlib import Path
+from typing import Literal, Optional
 
-from datamodel_code_generator import PythonVersion
+from datamodel_code_generator import DatetimeClassType, PythonVersion
 from datamodel_code_generator.model import pydantic_v2 as pydantic_model
 from datamodel_code_generator.parser.openapi import OpenAPIParser
+from datamodel_code_generator.types import StrictTypes
 
 from openapi_to_fastapi.logger import logger
 
 
-def generate_model_from_schema(schema: str, format_code: bool = False) -> str:
+def generate_model_from_schema(
+    schema: str,
+    format_code: bool = False,
+    extra_fields: Optional[Literal["allow", "ignore", "forbid"]] = None,
+    use_strict_types: bool = False,
+    use_strict_dates: bool = False,
+) -> str:
     """
     Given an OpenAPI schema, generate pydantic models from everything defined
     in the "components/schemas" section
 
     :param schema: Content of an OpenAPI spec, plain text
     :param format_code: Whether to format generated code
+    :param extra_fields: What to do with extra fields
+    :param use_strict_types: Whether to use strict types
+    :param use_strict_dates: Whether to be strict about date and date times
     :return: Importable python code with generated models
     """
+    if use_strict_types:
+        strict_types = (
+            StrictTypes.str,
+            StrictTypes.bytes,
+            StrictTypes.int,
+            StrictTypes.float,
+            StrictTypes.bool,
+        )
+    else:
+        strict_types = None
+
+    if use_strict_dates:
+        target_datetime_class = DatetimeClassType.Awaredatetime
+    else:
+        target_datetime_class = DatetimeClassType.Datetime
+
     parser = OpenAPIParser(
         source=schema,
         data_model_type=pydantic_model.BaseModel,
@@ -31,10 +58,13 @@ def generate_model_from_schema(schema: str, format_code: bool = False) -> str:
         extra_template_data=None,
         target_python_version=PythonVersion.PY_39,
         dump_resolve_reference_action=None,
+        extra_fields=extra_fields,
+        strict_types=strict_types,
         field_constraints=False,
         snake_case_field=False,
         strip_default_none=False,
         aliases=None,
+        target_datetime_class=target_datetime_class,
     )
 
     result = parser.parse(format_=format_code)
@@ -53,17 +83,28 @@ def _clean_tempfile(tmp_file, delete=True):
 
 
 def load_models(
-    schema: str, name: str = "", cleanup: bool = True, format_code: bool = False
+    schema: str,
+    name: str = "",
+    cleanup: bool = True,
+    format_code: bool = False,
+    extra_fields: Optional[Literal["allow", "ignore", "forbid"]] = None,
+    use_strict_types: bool = False,
+    use_strict_dates: bool = False,
 ):
     """
     Generate pydantic models from OpenAPI spec and return a python module,
     which contains all the models from the "components/schemas" section.
     This function will create a dedicated python file in OS's temporary dir
-    and imports it
+    and imports it.
+
     :param schema: OpenAPI spec, plain text
     :param name: Prefix for a module name, optional
     :param cleanup: Whether to remove a file with models afterwards
     :param format_code: Whether to format generated code
+    :param extra_fields: What to do with extra fields, None falls back to default for
+    pydantic, i.e. ignore.
+    :param use_strict_types: Whether to use strict types
+    :param use_strict_dates: Whether to be strict about date and date times
     :return: Module with pydantic models
     """
     prefix = name.replace("/", "").replace(" ", "").replace("\\", "") + "_"
@@ -73,7 +114,10 @@ def load_models(
         ),
         delete=cleanup,
     ) as tmp_file:
-        model_py = generate_model_from_schema(schema, format_code)
+        model_py = generate_model_from_schema(
+            schema, format_code, extra_fields, use_strict_types, use_strict_dates
+        )
+        model_py = override_aware_datetime_with_stricter(model_py)
         tmp_file.write(model_py)
         if not cleanup:
             logger.info("Generated module %s: %s", name, tmp_file.name)
@@ -84,3 +128,58 @@ def load_models(
             return spec.loader.load_module(module_name)
         else:
             raise ValueError(f"Failed to load module {module_name}")
+
+
+def override_aware_datetime_with_stricter(file_content: str) -> str:
+    """
+    Overrides the AwareDatetime in the python file by identifying the first class
+    definition (after the imports at the top) and injecting a comment and then importing
+    the StrictAwareDatetime as AwareDatetime which will thus override the earlier
+    import.
+
+    Example of the file before applying changes:
+    > from __future__ import annotations
+    > from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StrictInt, ...
+    > from typing import List, Optional, Union
+    >
+    >
+    > class BadGateway(BaseModel):
+    >     pass
+    >     ...
+
+    Example of file after changes:
+    > from __future__ import annotations
+    > from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StrictInt, ...
+    > from typing import List, Optional, Union
+    >
+    > # Overriding the AwareDatetime with one that does stricter validation
+    > from openapi_to_fastapi.pydantic_validators import StrictAwareDatetime as Aware...
+    >
+    >
+    > class BadGateway(BaseModel):
+    >     pass
+    >     ...
+
+    :param file_content: The file content as a string.
+    :return: The modified file content as a string.
+    """
+    comment = "# Overriding the AwareDatetime with one that does stricter validation"
+    import_override = (
+        "from openapi_to_fastapi.pydantic_validators import "
+        "StrictAwareDatetime as AwareDatetime"
+    )
+
+    if "AwareDatetime" in file_content:
+        newline = "\n"
+        if "\r\n" in file_content:
+            newline = "\r\n"
+
+        parts = file_content.partition(f"{newline}{newline}class ")
+        file_content = (
+            f"{parts[0]}{newline}"
+            f"{comment}{newline}"
+            f"{import_override}{newline}"
+            f"{parts[1]}{parts[2]}"
+        )
+
+    return file_content
