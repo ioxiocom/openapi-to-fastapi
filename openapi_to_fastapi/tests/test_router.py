@@ -443,6 +443,42 @@ def test_dependencies(app, client, specs_root):
             id="datetime-with-space",
         ),
         pytest.param(
+            {"datetime1": "2025-09-10T12:34:56+10:00"},
+            200,
+            200,
+            id="datetime-with-plus",
+        ),
+        pytest.param(
+            {"datetime1": "2025-09-10T12:34:56-10:00"},
+            200,
+            200,
+            id="datetime-with-minus",
+        ),
+        pytest.param(
+            {"datetime1": "2025-09-10T12:34:56Z"},
+            200,
+            200,
+            id="datetime-with-z",
+        ),
+        pytest.param(
+            {"datetime1": "2025-09-10T12:34:56.789+10:00"},
+            200,
+            200,
+            id="datetime-with-plus-secfrac",
+        ),
+        pytest.param(
+            {"datetime1": "2025-09-10T12:34:56.789-10:00"},
+            200,
+            200,
+            id="datetime-with-minus-secfrac",
+        ),
+        pytest.param(
+            {"datetime1": "2025-09-10T12:34:56.789Z"},
+            200,
+            200,
+            id="datetime-with-z-secfrac",
+        ),
+        pytest.param(
             {"listDatetime": [1757451600]},
             200,
             422,
