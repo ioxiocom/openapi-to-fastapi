@@ -117,7 +117,8 @@ def load_models(
         model_py = generate_model_from_schema(
             schema, format_code, extra_fields, use_strict_types, use_strict_dates
         )
-        model_py = override_aware_datetime_with_stricter(model_py)
+        if use_strict_dates:
+            model_py = override_aware_datetime_with_stricter(model_py)
         tmp_file.write(model_py)
         if not cleanup:
             logger.info("Generated module %s: %s", name, tmp_file.name)
