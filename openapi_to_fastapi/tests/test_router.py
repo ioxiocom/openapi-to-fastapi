@@ -1,6 +1,5 @@
 from typing import Any, Dict
 
-import httpx
 import pydantic
 import pytest
 from fastapi import Depends, Header, HTTPException, Request
@@ -514,10 +513,10 @@ def test_validation(
     def strict_validation_route(request):
         return {"ok": True}
 
-    def make_lax_request(json: Dict[str, Any]) -> httpx.Response:
+    def make_lax_request(json: Dict[str, Any]) -> Any:
         return client.post("/TestValidation_v0.1", json=json)
 
-    def make_strict_request(json: Dict[str, Any]) -> httpx.Response:
+    def make_strict_request(json: Dict[str, Any]) -> Any:
         return client.post("/TestValidation_v0.2", json=json)
 
     valid_data = {
