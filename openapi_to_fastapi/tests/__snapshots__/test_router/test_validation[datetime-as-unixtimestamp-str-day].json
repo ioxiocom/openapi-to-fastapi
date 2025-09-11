@@ -4,11 +4,10 @@
       "ctx": {
         "error": "input does not follow RFC 3339"
       },
-      "input": "2025-09-10T00:00:00",
+      "input": "1757548800",
       "loc": [
         "body",
-        "listDatetime",
-        0
+        "datetime1"
       ],
       "msg": "Input should be a valid datetime, in RFC 3339 format",
       "type": "datetime_from_date_parsing"

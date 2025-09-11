@@ -118,7 +118,7 @@ def load_models(
             schema, format_code, extra_fields, use_strict_types, use_strict_dates
         )
         if use_strict_dates:
-            model_py = override_aware_datetime_with_stricter(model_py)
+            model_py = override_with_stricter_dates(model_py)
         tmp_file.write(model_py)
         if not cleanup:
             logger.info("Generated module %s: %s", name, tmp_file.name)
@@ -131,17 +131,18 @@ def load_models(
             raise ValueError(f"Failed to load module {module_name}")
 
 
-def override_aware_datetime_with_stricter(file_content: str) -> str:
+def override_with_stricter_dates(file_content: str) -> str:
     """
-    Overrides the AwareDatetime in the python file by identifying the first class
-    definition (after the imports at the top) and injecting a comment and then importing
-    the StrictAwareDatetime as AwareDatetime which will thus override the earlier
-    import.
+    Overrides the AwareDatetime and date in the python file by identifying the first
+    class definition (after the imports at the top) and injecting a comment and then
+    importing the StrictAwareDatetime as AwareDatetime and StrictDate as date which will
+    thus override the earlier imports.
 
     Example of the file before applying changes:
     > from __future__ import annotations
     > from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StrictInt, ...
     > from typing import List, Optional, Union
+    > from datetime import date
     >
     >
     > class BadGateway(BaseModel):
@@ -152,9 +153,11 @@ def override_aware_datetime_with_stricter(file_content: str) -> str:
     > from __future__ import annotations
     > from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StrictInt, ...
     > from typing import List, Optional, Union
+    > from datetime import date
     >
-    > # Overriding the AwareDatetime with one that does stricter validation
+    > # Overriding the AwareDatetime and date with ones that do stricter validation
     > from openapi_to_fastapi.pydantic_validators import StrictAwareDatetime as Aware...
+    > from openapi_to_fastapi.pydantic_validators import StrictDate as date
     >
     >
     > class BadGateway(BaseModel):
@@ -164,13 +167,18 @@ def override_aware_datetime_with_stricter(file_content: str) -> str:
     :param file_content: The file content as a string.
     :return: The modified file content as a string.
     """
-    comment = "# Overriding the AwareDatetime with one that does stricter validation"
-    import_override = (
+    comment = (
+        "# Overriding the AwareDatetime and date with ones that do stricter validation"
+    )
+    import_strict_date_time = (
         "from openapi_to_fastapi.pydantic_validators import "
         "StrictAwareDatetime as AwareDatetime"
     )
+    import_strict_date = (
+        "from openapi_to_fastapi.pydantic_validators import StrictDate as date"
+    )
 
-    if "AwareDatetime" in file_content:
+    if "AwareDatetime" in file_content or "date" in file_content:
         newline = "\n"
         if "\r\n" in file_content:
             newline = "\r\n"
@@ -179,7 +187,8 @@ def override_aware_datetime_with_stricter(file_content: str) -> str:
         file_content = (
             f"{parts[0]}{newline}"
             f"{comment}{newline}"
-            f"{import_override}{newline}"
+            f"{import_strict_date_time}{newline}"
+            f"{import_strict_date}{newline}"
             f"{parts[1]}{parts[2]}"
         )
 

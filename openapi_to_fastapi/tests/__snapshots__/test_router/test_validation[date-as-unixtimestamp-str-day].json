@@ -4,7 +4,7 @@
       "ctx": {
         "error": "input is not of form YYYY-MM-DD"
       },
-      "input": "2025-01",
+      "input": "1757548800",
       "loc": [
         "body",
         "date1"

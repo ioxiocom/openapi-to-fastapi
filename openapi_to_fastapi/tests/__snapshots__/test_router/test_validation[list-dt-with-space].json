@@ -10,7 +10,7 @@
         "listDatetime",
         0
       ],
-      "msg": "Input should be a valid datetime or date, in RFC 3339 format",
+      "msg": "Input should be a valid datetime, in RFC 3339 format",
       "type": "datetime_from_date_parsing"
     }
   ]
