@@ -1,3 +1,6 @@
+from typing import Any, Dict
+
+import httpx
 import pydantic
 import pytest
 from fastapi import Depends, Header, HTTPException, Request
@@ -285,3 +288,240 @@ def test_dependencies(app, client, specs_root):
         "/Company/BasicInfo", json={"companyId": "test"}, headers={"X-Brew": "coffee"}
     )
     assert resp.status_code == 418, resp.json()
+
+
+@pytest.mark.parametrize(
+    ["overrides", "expected_lax_code", "expected_strict_code"],
+    [
+        pytest.param(
+            {},
+            200,
+            200,
+            id="default",
+        ),
+        pytest.param(
+            {"number1": "50.2"},
+            200,
+            422,
+            id="float-as-string",
+        ),
+        pytest.param(
+            {"number4": "2"},
+            200,
+            422,
+            id="int-as-string",
+        ),
+        pytest.param(
+            {"number1": 1},
+            200,
+            200,
+            id="float-as-int",
+        ),
+        pytest.param(
+            {"number3": 1.00},
+            200,
+            422,
+            id="int-as-float",
+        ),
+        pytest.param(
+            {"bool1": "true"},
+            200,
+            422,
+            id="bool-as-string",
+        ),
+        pytest.param(
+            {"bool1": "abc"},
+            422,
+            422,
+            id="bool-as-random-text",
+        ),
+        pytest.param(
+            {"bool1": 1},
+            200,
+            422,
+            id="bool-as-int",
+        ),
+        pytest.param(
+            {"bool1": None},
+            422,
+            422,
+            id="bool-as-null",
+        ),
+        pytest.param(
+            {"string1": 123},
+            422,
+            422,
+            id="string-as-int",
+        ),
+        pytest.param(
+            {"string1": 123.1},
+            422,
+            422,
+            id="string-as-float",
+        ),
+        pytest.param(
+            {"date1": 1757451600},
+            422,
+            422,
+            id="date-as-unixtimestamp",
+        ),
+        pytest.param(
+            {"date1": "1757451600"},
+            422,
+            422,
+            id="date-as-unixtimestamp-str",
+        ),
+        pytest.param(
+            {"date1": "2025-01"},
+            422,
+            422,
+            id="date-as-month",
+        ),
+        pytest.param(
+            {"date1": "2025-01-00"},
+            422,
+            422,
+            id="date-as-month-00",
+        ),
+        pytest.param(
+            {"datetime1": 1757451600},
+            200,
+            422,
+            id="datetime-as-unixtimestamp",
+        ),
+        pytest.param(
+            {"datetime1": "1757451600"},
+            200,
+            422,
+            id="datetime-as-unixtimestamp-str",
+        ),
+        pytest.param(
+            {"datetime1": "2025-09-10T00:00:00"},
+            200,
+            422,
+            id="datetime-naive",
+        ),
+        pytest.param(
+            {"datetime1": "2025-09-10t00:00:00Z"},
+            200,
+            422,
+            id="datetime-lower-case-t",
+        ),
+        pytest.param(
+            {"datetime1": "2025-09-10T00:00:00z"},
+            200,
+            422,
+            id="datetime-lower-case-z",
+        ),
+        pytest.param(
+            {"datetime1": "2025-09-10 00:00:00Z"},
+            200,
+            422,
+            id="datetime-with-space",
+        ),
+        pytest.param(
+            {"listDatetime": [1757451600]},
+            200,
+            422,
+            id="list-dt-as-unixtimestamp",
+        ),
+        pytest.param(
+            {"listDatetime": ["1757451600"]},
+            200,
+            422,
+            id="list-dt-as-unixtimestamp-str",
+        ),
+        pytest.param(
+            {"listDatetime": ["2025-09-10T00:00:00"]},
+            200,
+            422,
+            id="list-dt-naive",
+        ),
+        pytest.param(
+            {"listDatetime": ["2025-09-10t00:00:00Z"]},
+            200,
+            422,
+            id="list-dt-lower-case-t",
+        ),
+        pytest.param(
+            {"listDatetime": ["2025-09-10T00:00:00z"]},
+            200,
+            422,
+            id="list-dt-lower-case-z",
+        ),
+        pytest.param(
+            {"listDatetime": ["2025-09-10 00:00:00Z"]},
+            200,
+            422,
+            id="list-dt-with-space",
+        ),
+    ],
+)
+def test_validation(
+    app,
+    client,
+    specs_root,
+    json_snapshot,
+    overrides,
+    expected_lax_code,
+    expected_strict_code,
+):
+
+    spec_router = SpecRouter(specs_root / "definitions")
+    app.include_router(spec_router.to_fastapi_router())
+
+    @spec_router.post("/TestValidation_v0.1")
+    def lax_validation_route(request):
+        return {"ok": True}
+
+    @spec_router.post("/TestValidation_v0.2")
+    def strict_validation_route(request):
+        return {"ok": True}
+
+    def make_lax_request(json: Dict[str, Any]) -> httpx.Response:
+        return client.post("/TestValidation_v0.1", json=json)
+
+    def make_strict_request(json: Dict[str, Any]) -> httpx.Response:
+        return client.post("/TestValidation_v0.2", json=json)
+
+    valid_data = {
+        "number1": 50.5,
+        "number2": 50.5,
+        "number3": 50,
+        "number4": 5,
+        "number5": 50.2,
+        "number6": 50.3,
+        "number7": 50,
+        "number8": 5,
+        "bool1": True,
+        "bool2": True,
+        "string1": "Foo",
+        "string2": "Foo",
+        "string3": "Foo",
+        "string4": "Foo",
+        "date1": "2025-01-01",
+        "date2": "2025-01-01",
+        "datetime1": "2025-01-01T00:00:00+00:00",
+        "datetime2": "2025-01-01T00:00:00+00:00",
+        "enum1": "foo",
+        "enum2": "foo",
+        "listStr": ["abc", "def"],
+        "listFloat": [0.2, 0.5],
+        "listInt": [1, 2, 3],
+        "listDate": ["2025-01-01"],
+        "listDatetime": ["2025-01-01T00:00:00+00:00"],
+        "listBool": [True, False],
+        "listEnum": ["foo", "bar"],
+    }
+
+    data = {**valid_data, **overrides}
+
+    resp = make_lax_request(json=data)
+    assert resp.status_code == expected_lax_code, resp.json()
+    if resp.status_code != 200:
+        assert json_snapshot == resp.json()
+
+    resp = make_strict_request(json=data)
+    assert resp.status_code == expected_strict_code, resp.json()
+    if resp.status_code != 200:
+        assert json_snapshot == resp.json()

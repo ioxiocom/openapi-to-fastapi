@@ -4,7 +4,9 @@ from typing import Annotated, Any
 from pydantic import AwareDatetime, BeforeValidator
 from pydantic_core import PydanticCustomError
 
-year_dash_pattern = re.compile(r"^\d{4}-")
+rfc_3339_pattern = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(Z|[\+-]\d{2}:\d{2})$"
+)
 
 
 def strict_datetime_validator(value: Any) -> str:
@@ -22,24 +24,20 @@ def strict_datetime_validator(value: Any) -> str:
     if not isinstance(value, str):
         # This will (also) catch integers that would else be parsed as unix timestamps.
 
-        # This is derived from similar errors pydantic raises when validating date
-        # times.
+        # Derived from similar errors pydantic raises when validating date times.
         raise PydanticCustomError(
             "datetime_from_date_parsing",
             "Input should be a valid datetime or date, input is not a string",
             {"error": "input not string"},
         )
 
-    if not re.match(year_dash_pattern, value):
-        # Merely check the string starts with a valid pattern, like YYYY-. A string of
-        # only digits would be parsed as a unix timestamp by AwareDatetime. The rest of
-        # the validation of the string is left to AwareDatetime.
-
-        # This mimics the error pydantic raises for partial strings.
+    if not re.match(rfc_3339_pattern, value):
+        # Validates the format of the string strictly, but leaves things like how many
+        # days there is in a month, or hours in a day, etc. to AwareDatetime to check.
         raise PydanticCustomError(
             "datetime_from_date_parsing",
-            "Input should be a valid datetime or date, input is too short",
-            {"error": "input is too short"},
+            "Input should be a valid datetime or date, in RFC 3339 format",
+            {"error": "input does not follow RFC 3339"},
         )
 
     return value

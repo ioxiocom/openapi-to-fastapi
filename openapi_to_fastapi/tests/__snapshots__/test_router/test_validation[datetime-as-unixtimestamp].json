@@ -1,0 +1,16 @@
+{
+  "detail": [
+    {
+      "ctx": {
+        "error": "input not string"
+      },
+      "input": 1757451600,
+      "loc": [
+        "body",
+        "datetime1"
+      ],
+      "msg": "Input should be a valid datetime or date, input is not a string",
+      "type": "datetime_from_date_parsing"
+    }
+  ]
+}

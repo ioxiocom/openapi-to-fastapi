@@ -1,0 +1,13 @@
+{
+  "detail": [
+    {
+      "input": 1.0,
+      "loc": [
+        "body",
+        "number3"
+      ],
+      "msg": "Input should be a valid integer",
+      "type": "int_type"
+    }
+  ]
+}

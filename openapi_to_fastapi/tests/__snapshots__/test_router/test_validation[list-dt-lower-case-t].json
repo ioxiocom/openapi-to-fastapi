@@ -1,0 +1,17 @@
+{
+  "detail": [
+    {
+      "ctx": {
+        "error": "input does not follow RFC 3339"
+      },
+      "input": "2025-09-10t00:00:00Z",
+      "loc": [
+        "body",
+        "listDatetime",
+        0
+      ],
+      "msg": "Input should be a valid datetime or date, in RFC 3339 format",
+      "type": "datetime_from_date_parsing"
+    }
+  ]
+}
