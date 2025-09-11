@@ -60,7 +60,6 @@ def strict_date_validator(value: Any) -> str:
     if not isinstance(value, str):
         # This will (also) catch integers that would else be parsed as unix timestamps.
 
-        # Derived from similar errors pydantic raises when validating date times.
         raise PydanticCustomError(
             "date_type",
             "Input should be a valid date, input is not a string",
@@ -69,7 +68,7 @@ def strict_date_validator(value: Any) -> str:
 
     if not re.match(year_month_day_pattern, value):
         # Validates the format of the string strictly, but leaves things like how many
-        # days there is in a month, or hours in a day, etc. to AwareDatetime to check.
+        # days there is in a month to the normal date class.
         raise PydanticCustomError(
             "date_from_datetime_parsing",
             "Input should be a valid date, in RFC3339 'full-date' format",

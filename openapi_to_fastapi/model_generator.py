@@ -67,8 +67,12 @@ def generate_model_from_schema(
         target_datetime_class=target_datetime_class,
     )
 
-    result = parser.parse(format_=format_code)
-    return str(result)
+    result = str(parser.parse(format_=format_code))
+
+    if use_strict_dates:
+        result = override_with_stricter_dates(result)
+
+    return result
 
 
 @contextmanager
@@ -117,8 +121,6 @@ def load_models(
         model_py = generate_model_from_schema(
             schema, format_code, extra_fields, use_strict_types, use_strict_dates
         )
-        if use_strict_dates:
-            model_py = override_with_stricter_dates(model_py)
         tmp_file.write(model_py)
         if not cleanup:
             logger.info("Generated module %s: %s", name, tmp_file.name)
