@@ -169,16 +169,16 @@ def override_with_stricter_dates(file_content: str) -> str:
     )
 
     if "AwareDatetime" in file_content or "date" in file_content:
-        newline = "\n"
+        nl = "\n"
         if "\r\n" in file_content:
-            newline = "\r\n"
+            nl = "\r\n"
 
-        parts = file_content.partition(f"{newline}{newline}class ")
+        parts = file_content.partition(f"{nl}{nl}class ")
         file_content = (
-            f"{parts[0]}{newline}"
-            f"{comment}{newline}"
-            f"{import_strict_date_time}{newline}"
-            f"{import_strict_date}{newline}"
+            f"{parts[0]}{nl}"
+            f"{comment}{nl}"
+            f"{import_strict_date_time}{nl}"
+            f"{import_strict_date}{nl}"
             f"{parts[1]}{parts[2]}"
         )
 
