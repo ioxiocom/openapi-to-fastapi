@@ -29,7 +29,8 @@ def strict_datetime_validator(value: Any) -> str:
 
         raise PydanticCustomError(
             "datetime_type",
-            "Input should be a valid datetime in RFC 3339 format, input is not a string",
+            "Input should be a valid datetime in RFC 3339 format, input is not a "
+            "string",
             {"error": "input not string"},
         )
 
@@ -62,7 +63,8 @@ def strict_date_validator(value: Any) -> str:
 
         raise PydanticCustomError(
             "date_type",
-            "Input should be a valid date in RFC3339 'full-date' format, input is not a string",
+            "Input should be a valid date in RFC 3339 'full-date' format, input is not "
+            "a string",
             {"error": "input not string"},
         )
 
@@ -71,7 +73,7 @@ def strict_date_validator(value: Any) -> str:
         # days there is in a month to the normal date class.
         raise PydanticCustomError(
             "date_from_datetime_parsing",
-            "Input should be a valid date, in RFC3339 'full-date' format",
+            "Input should be a valid date, in RFC 3339 'full-date' format",
             {"error": "input is not of form YYYY-MM-DD"},
         )
 
