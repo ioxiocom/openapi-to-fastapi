@@ -9,7 +9,7 @@
         "body",
         "date1"
       ],
-      "msg": "Input should be a valid date, in RFC3339 'full-date' format",
+      "msg": "Input should be a valid date, in RFC 3339 'full-date' format",
       "type": "date_from_datetime_parsing"
     }
   ]
