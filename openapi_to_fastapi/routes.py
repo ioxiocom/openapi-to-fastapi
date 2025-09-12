@@ -125,9 +125,7 @@ class SpecRouter:
                     path,
                     cleanup=cleanup,
                     format_code=self._format_code,
-                    extra_fields="forbid" if strict_validation else None,
-                    use_strict_types=strict_validation,
-                    use_strict_dates=strict_validation,
+                    strict_validation=strict_validation,
                 )
                 post = path_item.post
                 if post:

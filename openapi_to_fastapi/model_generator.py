@@ -3,7 +3,6 @@ import tempfile
 import uuid
 from contextlib import contextmanager, suppress
 from pathlib import Path
-from typing import Literal, Optional
 
 from datamodel_code_generator import DatetimeClassType, PythonVersion
 from datamodel_code_generator.model import pydantic_v2 as pydantic_model
@@ -16,9 +15,7 @@ from openapi_to_fastapi.logger import logger
 def generate_model_from_schema(
     schema: str,
     format_code: bool = False,
-    extra_fields: Optional[Literal["allow", "ignore", "forbid"]] = None,
-    use_strict_types: bool = False,
-    use_strict_dates: bool = False,
+    strict_validation: bool = False,
 ) -> str:
     """
     Given an OpenAPI schema, generate pydantic models from everything defined
@@ -26,12 +23,10 @@ def generate_model_from_schema(
 
     :param schema: Content of an OpenAPI spec, plain text
     :param format_code: Whether to format generated code
-    :param extra_fields: What to do with extra fields
-    :param use_strict_types: Whether to use strict types
-    :param use_strict_dates: Whether to be strict about date and date times
+    :param strict_validation: Whether to use strict validation
     :return: Importable python code with generated models
     """
-    if use_strict_types:
+    if strict_validation:
         strict_types = (
             StrictTypes.str,
             StrictTypes.bytes,
@@ -42,7 +37,7 @@ def generate_model_from_schema(
     else:
         strict_types = None
 
-    if use_strict_dates:
+    if strict_validation:
         target_datetime_class = DatetimeClassType.Awaredatetime
     else:
         target_datetime_class = DatetimeClassType.Datetime
@@ -58,7 +53,7 @@ def generate_model_from_schema(
         extra_template_data=None,
         target_python_version=PythonVersion.PY_39,
         dump_resolve_reference_action=None,
-        extra_fields=extra_fields,
+        extra_fields="forbid" if strict_validation else None,
         strict_types=strict_types,
         field_constraints=False,
         snake_case_field=False,
@@ -69,7 +64,7 @@ def generate_model_from_schema(
 
     result = str(parser.parse(format_=format_code))
 
-    if use_strict_dates:
+    if strict_validation:
         result = override_with_stricter_dates(result)
 
     return result
@@ -91,9 +86,7 @@ def load_models(
     name: str = "",
     cleanup: bool = True,
     format_code: bool = False,
-    extra_fields: Optional[Literal["allow", "ignore", "forbid"]] = None,
-    use_strict_types: bool = False,
-    use_strict_dates: bool = False,
+    strict_validation: bool = False,
 ):
     """
     Generate pydantic models from OpenAPI spec and return a python module,
@@ -105,10 +98,7 @@ def load_models(
     :param name: Prefix for a module name, optional
     :param cleanup: Whether to remove a file with models afterwards
     :param format_code: Whether to format generated code
-    :param extra_fields: What to do with extra fields, None falls back to default for
-    pydantic, i.e. ignore.
-    :param use_strict_types: Whether to use strict types
-    :param use_strict_dates: Whether to be strict about date and date times
+    :param strict_validation: Whether to use strict validation
     :return: Module with pydantic models
     """
     prefix = name.replace("/", "").replace(" ", "").replace("\\", "") + "_"
@@ -118,9 +108,7 @@ def load_models(
         ),
         delete=cleanup,
     ) as tmp_file:
-        model_py = generate_model_from_schema(
-            schema, format_code, extra_fields, use_strict_types, use_strict_dates
-        )
+        model_py = generate_model_from_schema(schema, format_code, strict_validation)
         tmp_file.write(model_py)
         if not cleanup:
             logger.info("Generated module %s: %s", name, tmp_file.name)
