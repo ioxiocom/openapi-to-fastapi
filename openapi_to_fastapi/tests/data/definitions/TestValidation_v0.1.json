@@ -1,0 +1,723 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Validation testing",
+    "description": "Definition for validating different kinds of fields",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/TestValidation_v0.1": {
+      "post": {
+        "summary": "Validation testing",
+        "description": "Definition for validating different kinds of fields",
+        "operationId": "request_TestValidation_v0_1",
+        "parameters": [
+          {
+            "name": "x-consent-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Optional consent token",
+              "default": "",
+              "title": "X-Consent-Token"
+            },
+            "description": "Optional consent token"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "The login token. Value should be \"Bearer [token]\"",
+              "default": "",
+              "title": "Authorization"
+            },
+            "description": "The login token. Value should be \"Bearer [token]\""
+          },
+          {
+            "name": "x-authorization-provider",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The bare domain of the system that provided the token.",
+              "title": "X-Authorization-Provider"
+            },
+            "description": "The bare domain of the system that provided the token."
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-API-Key",
+              "description": "API key or token"
+            },
+            "description": "API key or token"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitExceeded"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "444": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSourceNotFound"
+                }
+              }
+            },
+            "description": "Additional Response"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSourceError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadGateway"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "text/plain": {},
+              "text/html": {},
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailable"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "text/plain": {},
+              "text/html": {},
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GatewayTimeout"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          },
+          "550": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DoesNotConformToDefinition"
+                }
+              }
+            },
+            "description": "Additional Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BadGateway": {
+        "properties": {},
+        "type": "object",
+        "title": "BadGateway",
+        "description": "This response is reserved by Product Gateway."
+      },
+      "DataSourceError": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Error type",
+            "description": "Error identifier"
+          },
+          "message": {
+            "type": "string",
+            "title": "Error message",
+            "description": "Error description"
+          }
+        },
+        "type": "object",
+        "required": ["type", "message"],
+        "title": "DataSourceError"
+      },
+      "DataSourceNotFound": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Error message",
+            "description": "Error description",
+            "default": "Data source not found"
+          }
+        },
+        "type": "object",
+        "title": "DataSourceNotFound",
+        "description": "This response is reserved by Product Gateway."
+      },
+      "DoesNotConformToDefinition": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Response from data source does not conform to definition"
+          },
+          "data_source_status_code": {
+            "type": "integer",
+            "title": "Data source status code",
+            "description": "HTTP status code returned from the data source"
+          }
+        },
+        "type": "object",
+        "required": ["data_source_status_code"],
+        "title": "DoesNotConformToDefinition",
+        "description": "This response is reserved by Product Gateway."
+      },
+      "ExampleEnum": {
+        "type": "string",
+        "enum": ["foo", "bar"],
+        "title": "ExampleEnum"
+      },
+      "Forbidden": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Error type",
+            "description": "Error identifier"
+          },
+          "message": {
+            "type": "string",
+            "title": "Error message",
+            "description": "Error description"
+          }
+        },
+        "type": "object",
+        "required": ["type", "message"],
+        "title": "Forbidden"
+      },
+      "GatewayTimeout": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Error message",
+            "description": "Error description",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "GatewayTimeout",
+        "description": "This response is reserved by Product Gateway."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "NotFound": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Error type",
+            "description": "Error identifier"
+          },
+          "message": {
+            "type": "string",
+            "title": "Error message",
+            "description": "Error description"
+          }
+        },
+        "type": "object",
+        "required": ["type", "message"],
+        "title": "NotFound"
+      },
+      "RateLimitExceeded": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Error message",
+            "description": "Error description",
+            "default": "Rate limit exceeded"
+          }
+        },
+        "type": "object",
+        "title": "RateLimitExceeded",
+        "description": "This response is reserved by Product Gateway."
+      },
+      "ServiceUnavailable": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Error message",
+            "description": "Error description",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "ServiceUnavailable",
+        "description": "This response is reserved by Product Gateway."
+      },
+      "Unauthorized": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Error type",
+            "description": "Error identifier"
+          },
+          "message": {
+            "type": "string",
+            "title": "Error message",
+            "description": "Error description"
+          }
+        },
+        "type": "object",
+        "required": ["type", "message"],
+        "title": "Unauthorized"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      },
+      "ValidationRequest": {
+        "properties": {
+          "number1": {
+            "type": "number",
+            "title": "Number 1",
+            "description": "Float with no extra validation.",
+            "examples": [50.5]
+          },
+          "number2": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Number 2",
+            "description": "Float 0-100.",
+            "examples": [50.5]
+          },
+          "number3": {
+            "type": "integer",
+            "title": "Number 3",
+            "description": "Integer with no extra validation.",
+            "examples": [50]
+          },
+          "number4": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 0.0,
+            "title": "Number 4",
+            "description": "Integer 0-10.",
+            "examples": [5]
+          },
+          "number5": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number 5",
+            "description": "Optional float with no extra validation.",
+            "examples": [50.2]
+          },
+          "number6": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": -0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number 6",
+            "description": "Optional float 0-100.",
+            "examples": [50.3]
+          },
+          "number7": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number 7",
+            "description": "Optional integer with no extra validation.",
+            "examples": [50]
+          },
+          "number8": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number 8",
+            "description": "Optional integer 0-10.",
+            "examples": [5]
+          },
+          "bool1": {
+            "type": "boolean",
+            "title": "Bool 1",
+            "description": "Required boolean.",
+            "examples": [true]
+          },
+          "bool2": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bool 2",
+            "description": "Optional boolean.",
+            "examples": [true]
+          },
+          "string1": {
+            "type": "string",
+            "title": "String 1",
+            "description": "Required string.",
+            "examples": ["Foo"]
+          },
+          "string2": {
+            "type": "string",
+            "maxLength": 10,
+            "title": "String 2",
+            "description": "Required string with max length 10.",
+            "examples": ["Foo"]
+          },
+          "string3": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "String 3",
+            "description": "Optional string.",
+            "examples": ["Foo"]
+          },
+          "string4": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 10,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "String 4",
+            "description": "Optional string with min length 1 and max length 10.",
+            "examples": ["Foo"]
+          },
+          "date1": {
+            "type": "string",
+            "format": "date",
+            "title": "Date 1",
+            "description": "Required date.",
+            "examples": ["2025-01-01"]
+          },
+          "date2": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date 2",
+            "description": "Optional date.",
+            "examples": ["2025-01-01"]
+          },
+          "datetime1": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Datetime 1",
+            "description": "Required datetime.",
+            "examples": ["2025-01-01T00:00:00Z"]
+          },
+          "datetime2": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datetime 2",
+            "description": "Optional datetime.",
+            "examples": ["2025-01-01T00:00:00Z"]
+          },
+          "enum1": {
+            "$ref": "#/components/schemas/ExampleEnum",
+            "title": "Enum 1",
+            "description": "Required enum.",
+            "examples": ["foo"]
+          },
+          "enum2": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExampleEnum"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enum 2",
+            "description": "Optional enum.",
+            "examples": ["bar"]
+          },
+          "listStr": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "List strings",
+            "description": "List of string.",
+            "examples": [["abc", "def"]]
+          },
+          "listFloat": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "List floats",
+            "description": "List of floats.",
+            "examples": [[0.2, 0.5]]
+          },
+          "listInt": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "List ints",
+            "description": "List of integers.",
+            "examples": [[1, 2, 3]]
+          },
+          "listDate": {
+            "items": {
+              "type": "string",
+              "format": "date"
+            },
+            "type": "array",
+            "title": "List dates",
+            "description": "List of integers.",
+            "examples": [["2025-01-01"]]
+          },
+          "listDatetime": {
+            "items": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "type": "array",
+            "title": "List datetimes",
+            "description": "List of datetimes.",
+            "examples": [["2025-01-01T00:00:00Z"]]
+          },
+          "listBool": {
+            "items": {
+              "type": "boolean"
+            },
+            "type": "array",
+            "title": "List booleans",
+            "description": "List of booleans.",
+            "examples": [[true, false]]
+          },
+          "listEnum": {
+            "items": {
+              "$ref": "#/components/schemas/ExampleEnum"
+            },
+            "type": "array",
+            "title": "List enums",
+            "description": "List of booleans.",
+            "examples": [["foo", "bar"]]
+          }
+        },
+        "type": "object",
+        "required": [
+          "number1",
+          "number2",
+          "number3",
+          "number4",
+          "bool1",
+          "string1",
+          "string2",
+          "date1",
+          "datetime1",
+          "enum1",
+          "listStr",
+          "listFloat",
+          "listInt",
+          "listDate",
+          "listDatetime",
+          "listBool",
+          "listEnum"
+        ],
+        "title": "ValidationRequest"
+      },
+      "ValidationResponse": {
+        "properties": {
+          "ok": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "OK",
+            "examples": [true]
+          }
+        },
+        "type": "object",
+        "title": "ValidationResponse"
+      }
+    }
+  }
+}

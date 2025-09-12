@@ -1,0 +1,13 @@
+{
+  "detail": [
+    {
+      "input": "50.2",
+      "loc": [
+        "body",
+        "number1"
+      ],
+      "msg": "Input should be a valid number",
+      "type": "float_type"
+    }
+  ]
+}

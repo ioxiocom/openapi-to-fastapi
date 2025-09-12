@@ -1,0 +1,16 @@
+{
+  "detail": [
+    {
+      "ctx": {
+        "error": "day value is outside expected range"
+      },
+      "input": "2025-01-00",
+      "loc": [
+        "body",
+        "date1"
+      ],
+      "msg": "Input should be a valid date or datetime, day value is outside expected range",
+      "type": "date_from_datetime_parsing"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "detail": [
+    {
+      "ctx": {
+        "error": "input not string"
+      },
+      "input": 1757451600,
+      "loc": [
+        "body",
+        "date1"
+      ],
+      "msg": "Input should be a valid date in RFC 3339 'full-date' format, input is not a string",
+      "type": "date_type"
+    }
+  ]
+}

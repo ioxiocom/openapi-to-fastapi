@@ -1,0 +1,16 @@
+{
+  "detail": [
+    {
+      "ctx": {
+        "error": "input is not of form YYYY-MM-DD"
+      },
+      "input": "1757451600",
+      "loc": [
+        "body",
+        "date1"
+      ],
+      "msg": "Input should be a valid date, in RFC 3339 'full-date' format",
+      "type": "date_from_datetime_parsing"
+    }
+  ]
+}

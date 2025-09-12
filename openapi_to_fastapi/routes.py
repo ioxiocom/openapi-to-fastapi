@@ -118,9 +118,14 @@ class SpecRouter:
 
             raw_spec = spec_path.read_text(encoding="utf8")
             json_spec = json.loads(raw_spec)
+            strict_validation = bool(json_spec.get("x-strict-validation"))
             for path, path_item in parse_openapi_spec(json_spec).items():
                 models = load_models(
-                    raw_spec, path, cleanup=cleanup, format_code=self._format_code
+                    raw_spec,
+                    path,
+                    cleanup=cleanup,
+                    format_code=self._format_code,
+                    strict_validation=strict_validation,
                 )
                 post = path_item.post
                 if post:
