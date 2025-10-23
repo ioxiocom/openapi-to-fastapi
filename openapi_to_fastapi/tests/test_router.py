@@ -1,4 +1,5 @@
-from typing import Any, Dict
+import inspect
+from typing import Any, Dict, Optional
 
 import pydantic
 import pytest
@@ -596,3 +597,42 @@ def test_validation(
     assert resp.status_code == expected_strict_code, resp.json()
     if resp.status_code != 200:
         assert json_snapshot == resp.json()
+
+
+def test_modified_handler_signatures(app, client, specs_root):
+
+    spec_router = SpecRouter(specs_root / "definitions")
+
+    def handler_1(request, x_my_header: Optional[str] = Header(None)):
+        return {}
+
+    def handler_2(request, x_my_header: Optional[str] = Header(None)):
+        return {}
+
+    # Remove the header from handler_2
+    sig = inspect.signature(handler_2)
+    params = sig.parameters
+    filtered_params = [
+        param for param_name, param in params.items() if param_name != "x_my_header"
+    ]
+    handler_2.__signature__ = sig.replace(parameters=filtered_params)
+
+    # Add handlers to router (non-decorator syntax)
+    spec_router.post("/TestValidation_v0.1")(handler_1)
+    spec_router.post("/TestValidation_v0.2")(handler_2)
+
+    router = spec_router.to_fastapi_router()
+    app.include_router(router)
+    openapi_spec = app.openapi()
+
+    route_spec_1 = openapi_spec["paths"]["/TestValidation_v0.1"]
+    route_spec_2 = openapi_spec["paths"]["/TestValidation_v0.2"]
+
+    parameters_1 = route_spec_1["post"].get("parameters", {})
+    parameters_2 = route_spec_2["post"].get("parameters", {})
+
+    headers_1 = {p.get("name") for p in parameters_1 if p.get("in") == "header"}
+    headers_2 = {p.get("name") for p in parameters_2 if p.get("in") == "header"}
+
+    assert "x-my-header" in headers_1
+    assert "x-my-header" not in headers_2
