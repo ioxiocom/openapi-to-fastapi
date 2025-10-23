@@ -22,6 +22,11 @@ def copy_function(fn) -> Callable:
     )
     g.__kwdefaults__ = deepcopy(fn.__kwdefaults__)
     g.__annotations__ = deepcopy(fn.__annotations__)
+
+    # Signature is immutable, no need to copy/deepcopy
+    # Mypy doesn't know about __signature__: https://github.com/python/mypy/issues/12472
+    g.__signature__ = inspect.signature(fn)  # type: ignore[attr-defined]
+
     return g
 
 
@@ -32,9 +37,22 @@ def add_annotation_to_first_argument(fn: FunctionType, model: Type[pydantic.Base
     :param fn: Function to patch
     :param model: Type to add to the first argument
     """
-    fn_spec = inspect.getfullargspec(fn)
-    if not len(fn_spec.args):
+
+    sig = inspect.signature(fn)
+    params = sig.parameters
+    if not params:
         raise ValueError(f"Function {fn.__name__} has no arguments")
-    untyped_args = [a for a in fn_spec.args if a not in fn.__annotations__]
-    if untyped_args:
-        fn.__annotations__[untyped_args[0]] = model
+
+    updated = False
+    updated_params = []
+    for param_name, param in params.items():
+        if not updated and param.annotation is inspect.Parameter.empty:
+            updated_params.append(param.replace(annotation=model))
+            updated = True
+        else:
+            updated_params.append(param)
+
+    # Mypy doesn't know about __signature__: https://github.com/python/mypy/issues/12472
+    fn.__signature__ = sig.replace(  # type: ignore[attr-defined]
+        parameters=updated_params
+    )
