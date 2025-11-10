@@ -51,7 +51,7 @@ def generate_model_from_schema(
         base_class="pydantic.BaseModel",
         custom_template_dir=None,
         extra_template_data=None,
-        target_python_version=PythonVersion.PY_39,
+        target_python_version=PythonVersion.PY_310,
         dump_resolve_reference_action=None,
         extra_fields="forbid" if strict_validation else None,
         strict_types=strict_types,
