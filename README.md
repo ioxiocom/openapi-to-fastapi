@@ -255,7 +255,7 @@ router = SpecRouter(specs, validators=[MyValidator])
 
 You will need:
 
-- Python 3.9+ (tested on 3.9 - 3.13)
+- Python 3.10+ (tested on 3.10 - 3.13)
 - [pre-commit](https://pre-commit.com/#install)
 
 Before working on the project, make sure you run:
