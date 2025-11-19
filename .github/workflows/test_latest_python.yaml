@@ -21,7 +21,7 @@ jobs:
           allow-prereleases: true
 
       - name: Install Poetry and pre-commit 💈
-        run: pip install poetry==1.8.5 pre-commit
+        run: pip install poetry==2.2.1 pre-commit
 
       - name: Install dependencies 🛠
         run: poetry install
